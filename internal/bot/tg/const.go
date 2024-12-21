@@ -16,8 +16,6 @@ const (
 	CmdAddSuperuser = "asu"
 )
 
-var nonSuCmd = []string{CmdHelp, CmdAddSuperuser}
-
 const (
 	parseModeMarkdown = "MarkdownV2"
 )
