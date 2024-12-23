@@ -12,6 +12,7 @@ import (
 
 type Handler interface {
 	ListRoles() string
+	ListRoleItems() []string
 	AddRole(reqUserTgId int64, roleName string) string
 	RemoveRole(reqUserTgId int64, roleName string) string
 	ListRoleUsers(reqUserTgId int64) string
@@ -45,6 +46,18 @@ func (h *handler) ListRoles() string {
 		fmt.Fprintf(buf, "	\\- %s\n", role.Name)
 	}
 	return buf.String()
+}
+
+func (h *handler) ListRoleItems() []string {
+	roles, err := h.repo.ListRoles()
+	if err != nil {
+		return []string{}
+	}
+	items := []string{}
+	for _, role := range roles {
+		items = append(items, role.Name)
+	}
+	return items
 }
 
 func (h *handler) AddRole(reqUserTgId int64, roleName string) string {
@@ -84,7 +97,9 @@ func (h *handler) ListRoleUsers(reqUserTgId int64) string {
 	}
 	roles, err := h.repo.ListRoles()
 	if err != nil {
-
+		if err == sql.ErrNoRows {
+			return "No roles found"
+		}
 		return err.Error()
 	}
 
@@ -139,11 +154,11 @@ func (h *handler) AddRoleUser(reqUserTgId int64, roleName, userTgId string) stri
 		}
 		msg := err.Error()
 		if strings.Contains(msg, "UNIQUE constraint failed") {
-			return fmt.Sprintf("User *%s* already assigned to role *%s*", userTgId, roleName)
+			return fmt.Sprintf("User already assigned to role *%s*", roleName)
 		}
 		return msg
 	}
-	return fmt.Sprintf("User %s added to role", userTgId)
+	return fmt.Sprintf("User added to role")
 }
 
 func (h *handler) RemoveRoleUser(reqUserTgId int64, roleName, userTgId string) string {
@@ -178,7 +193,7 @@ func (h *handler) GetUsersByRole(roleName string) string {
 	users, err := h.repo.GetUsersByRole(roleName)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "No users assigned to role"
+			return ""
 		}
 		return err.Error()
 	}

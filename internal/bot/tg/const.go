@@ -3,7 +3,6 @@ package tg
 const (
 	CmdStart = "start"
 	CmdHelp  = "h"
-	CmdTag   = "t"
 
 	CmdList   = "l"
 	CmdAdd    = "a"
@@ -23,14 +22,15 @@ const (
 const (
 	helpMessage string = `
 *h* \- _show this message_
-*t* \- _tag users assigned to role_
 *l* \- _list roles_
 *asu* \- _\<token\> submit yourself as superuser_
+
+*How to tag*:
+Start typing \/ and find available role\. Press TAB to continue typing with role mention\.
 `
 
 	msgAlreadySuperuser = `
-
-Superuser commands:
+*Superuser commands*:
 *a* \- _\<roleName\> add role_
 *rm* \- _\<roleName\> remove role_
 *lu* \- _\<roleName\> list users_
