@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS role_users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     role_id INT NOT NULL,
-    user_tg_id TEXT NOT NULL,
+    user_tg_id INT NOT NULL,
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 

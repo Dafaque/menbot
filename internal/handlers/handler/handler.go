@@ -10,7 +10,12 @@ import (
 	"github.com/Dafaque/tgment/internal/store"
 )
 
+const (
+	defaultRoleName = "all"
+)
+
 type Handler interface {
+	Start(userTgId string) string
 	ListRoles() string
 	ListRoleItems() []string
 	AddRole(reqUserTgId int64, roleName string) string
@@ -30,6 +35,21 @@ type handler struct {
 
 func New(repo store.Repository, cfg *config.Config) Handler {
 	return &handler{repo: repo, suToken: cfg.SuToken}
+}
+
+func (h *handler) Start(userTgId string) string {
+	if err := h.repo.AddRoleUser(defaultRoleName, userTgId); err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			return err.Error()
+		}
+		if err := h.repo.AddRole(defaultRoleName); err != nil {
+			return err.Error()
+		}
+		if err := h.repo.AddRoleUser(defaultRoleName, userTgId); err != nil {
+			return err.Error()
+		}
+	}
+	return fmt.Sprintf("You are assigned to %s role\\!", defaultRoleName)
 }
 
 func (h *handler) ListRoles() string {

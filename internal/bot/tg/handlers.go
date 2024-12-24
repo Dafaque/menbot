@@ -101,6 +101,10 @@ func (b *Bot) HandleUpdate(update telego.Update) {
 	}
 }
 
+func (b *Bot) handleStart(userTgId string) string {
+	return b.handlers.Start(userTgId)
+}
+
 func (b *Bot) handleHelp(msgReqUserTgId int64) string {
 	msg := helpMessage
 	if b.handlers.IsUper(msgReqUserTgId) {
