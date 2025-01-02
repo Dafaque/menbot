@@ -5,9 +5,10 @@ import (
 	"errors"
 	"io/fs"
 	"log"
+	"os"
 	"path/filepath"
 
-	"github.com/Dafaque/tgment/db"
+	"github.com/Dafaque/mentbot/db"
 	"github.com/Masterminds/squirrel"
 	"github.com/mattn/go-sqlite3"
 )
@@ -35,6 +36,12 @@ type repository struct {
 }
 
 func New(appPath string) (Repository, error) {
+	if _, err := os.Stat(appPath); os.IsNotExist(err) {
+		err = os.MkdirAll(appPath, 0755)
+		if err != nil {
+			return nil, err
+		}
+	}
 	d, err := sql.Open("sqlite3", filepath.Join(appPath, sqliteDbName))
 	if err != nil {
 		return nil, err

@@ -1,19 +1,21 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"os/signal"
 
-	"github.com/Dafaque/tgment/internal/bot/tg"
-	"github.com/Dafaque/tgment/internal/config"
-	"github.com/Dafaque/tgment/internal/handlers/handler"
-	"github.com/Dafaque/tgment/internal/store"
+	"github.com/Dafaque/mentbot/internal/bot/tg"
+	"github.com/Dafaque/mentbot/internal/config"
+	"github.com/Dafaque/mentbot/internal/handlers/handler"
+	"github.com/Dafaque/mentbot/internal/store"
 )
 
 func main() {
 	cfg, err := config.NewConfig()
 	if err != nil {
+		flag.Usage()
 		log.Fatal(err)
 	}
 

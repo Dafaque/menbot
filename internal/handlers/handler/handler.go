@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Dafaque/tgment/internal/config"
-	"github.com/Dafaque/tgment/internal/store"
+	"github.com/Dafaque/mentbot/internal/config"
+	"github.com/Dafaque/mentbot/internal/store"
 )
 
 const (
@@ -38,6 +38,7 @@ func New(repo store.Repository, cfg *config.Config) Handler {
 }
 
 func (h *handler) Start(userTgId string) string {
+	userTgId = "@" + userTgId
 	if err := h.repo.AddRoleUser(defaultRoleName, userTgId); err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			return err.Error()

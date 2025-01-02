@@ -79,6 +79,8 @@ func (b *Bot) HandleUpdate(update telego.Update) {
 			break
 		}
 		response = b.handleAddSuperuser(token, msgReqUserTgId)
+	case CmdStart:
+		response = b.handleStart(update.Message.From.Username)
 	default:
 		response = b.handleTagRole(cmd)
 	}

@@ -2,7 +2,7 @@ package tg
 
 const (
 	CmdStart = "start"
-	CmdHelp  = "h"
+	CmdHelp  = "help"
 
 	CmdList   = "l"
 	CmdAdd    = "a"
@@ -21,7 +21,8 @@ const (
 
 const (
 	helpMessage string = `
-*h* \- _show this message_
+*help* \- _show this message_
+*start* \- _start bot_
 *l* \- _list roles_
 *asu* \- _\<token\> submit yourself as superuser_
 

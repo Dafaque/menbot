@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Dafaque/tgment/internal/handlers/handler"
+	"github.com/Dafaque/mentbot/internal/handlers/handler"
 	"github.com/mymmrac/telego"
 )
 
@@ -47,7 +47,8 @@ func (b *Bot) Stop() {
 
 func (b *Bot) updateCommands() {
 	commands := []telego.BotCommand{
-		{Command: "h", Description: "Show help"},
+		{Command: CmdHelp, Description: "Show help"},
+		{Command: CmdStart, Description: "Start bot"},
 	}
 	for _, role := range b.handlers.ListRoleItems() {
 		commands = append(commands, telego.BotCommand{Command: role, Description: fmt.Sprintf("Tag @%s users", role)})
