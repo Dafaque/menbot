@@ -41,48 +41,48 @@ func (b *Bot) HandleUpdate(update telego.Update) {
 	case CmdHelp:
 		response = b.handleHelp(msgReqUserTgId)
 	case CmdList:
-		response = b.handleListRoles()
+		response = cleanupOutput(b.handleListRoles())
 	case CmdAdd:
 		roleName, err := parseAddRoleArgs(args)
 		if err != nil {
 			response = err.Error()
 			break
 		}
-		response = b.handleAddRole(msgReqUserTgId, roleName)
+		response = cleanupOutput(b.handleAddRole(msgReqUserTgId, roleName))
 	case CmdRemove:
 		roleName, err := parseRemoveRoleArgs(args)
 		if err != nil {
 			response = err.Error()
 			break
 		}
-		response = b.handleRemoveRole(msgReqUserTgId, roleName)
+		response = cleanupOutput(b.handleRemoveRole(msgReqUserTgId, roleName))
 	case CmdListUsers:
-		response = b.handleListRoleUsers(msgReqUserTgId)
+		response = cleanupOutput(b.handleListRoleUsers(msgReqUserTgId))
 	case CmdAddUser:
 		roleName, userTgId, err := parseRoleUserArgs(args)
 		if err != nil {
 			response = err.Error()
 			break
 		}
-		response = b.handleAddRoleUser(msgReqUserTgId, roleName, userTgId)
+		response = cleanupOutput(b.handleAddRoleUser(msgReqUserTgId, roleName, userTgId))
 	case CmdRemoveUser:
 		roleName, userTgId, err := parseRoleUserArgs(args)
 		if err != nil {
 			response = err.Error()
 			break
 		}
-		response = b.handleRemoveRoleUser(msgReqUserTgId, roleName, userTgId)
+		response = cleanupOutput(b.handleRemoveRoleUser(msgReqUserTgId, roleName, userTgId))
 	case CmdAddSuperuser:
 		token, err := parseAddSuperuserArgs(args)
 		if err != nil {
 			response = err.Error()
 			break
 		}
-		response = b.handleAddSuperuser(token, msgReqUserTgId)
+		response = cleanupOutput(b.handleAddSuperuser(token, msgReqUserTgId))
 	case CmdStart:
-		response = b.handleStart(update.Message.From.Username)
+		response = cleanupOutput(b.handleStart(update.Message.From.Username))
 	default:
-		response = b.handleTagRole(cmd)
+		response = cleanupOutput(b.handleTagRole(cmd))
 	}
 
 	if len(response) == 0 {
@@ -147,4 +147,8 @@ func (b *Bot) handleAddSuperuser(token string, userTgId int64) string {
 
 func (b *Bot) handleTagRole(roleName string) string {
 	return b.handlers.GetUsersByRole(roleName)
+}
+
+func cleanupOutput(in string) string {
+	return strings.ReplaceAll(in, "_", "\\_")
 }
