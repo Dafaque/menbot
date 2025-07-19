@@ -15,6 +15,19 @@ paths:
         404:
           description: Чатов нет
   /chats/{chat_id}:
+    get:
+      summary: Get a chat
+      operationId: getChat
+      parameters:
+        - name: chat_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+      responses:
+        200:
+          $ref: '#/components/responses/ChatResponse'
     put:
       summary: Authorize/deauthorize chat
       operationId: authorizeChat
@@ -83,7 +96,51 @@ paths:
       responses:
         200:
           description: Role created
-  
+  /chats/{chat_id}/roles/{role_id}:
+    get:
+      summary: Get a role users
+      operationId: getRoleUsers
+      parameters:
+        - name: chat_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+        - name: role_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+      responses:
+        200:
+          $ref: '#/components/responses/UserListResponse'
+        404:
+          description: Chat or role not found
+    post:
+      summary: Assign a role to a users
+      operationId: assignRole
+      parameters:
+        - name: chat_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+        - name: role_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+      requestBody:
+        $ref: '#/components/requestBodies/AssignUsersToRoleRequest'
+      responses:
+        200:
+          description: Role assigned
+        404:
+          description: Chat or role not found
 components:
   responses:
     ChatListResponse:
@@ -141,7 +198,24 @@ components:
                 description: The name of the role
             required:
               - name
-
+    AssignUsersToRoleRequest:
+      description: A list of users to assign to a role
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  description: The unique identifier for the user
+                assign:
+                  type: boolean
+                  description: Whether to assign the user to the role
+              required:
+                - user_id
+                - assign
   schemas:
     Chat:
       type: object

@@ -3,13 +3,11 @@ import Table from "../framework/table.js";
 class ChatRolesListView extends Table {
     constructor(data) {
         super();
-        this.setTitle("Chat Roles List");
-        this.chat = data;
-        this.fetchRoles();
     }
 
 
     async fetchRoles() {
+        this.data = [];
         fetch(`/api/chats/${this.chat.id}/roles`).then(response => {
             if (response.ok) {
                 return response.json();
@@ -21,6 +19,18 @@ class ChatRolesListView extends Table {
                 this.render();
             }
         });
+    }
+
+    onSelected = (row) => {
+        window.app.router.navigate("/chats/details/roles/list/users", row);
+    }
+
+    appear = (data) => {
+        if (data) {
+            this.chat = data;
+            this.setTitle(`Chat ${data.tg_chat_name} Roles List`);
+        }
+        this.fetchRoles();
     }
 }
 

@@ -8,6 +8,7 @@ import ChatUsersView from "./views/chat-users.js";
 import ChatRolesView from "./views/chat-roles.js";
 import ChatRolesAddView from "./views/chat-roles-add.js";
 import ChatRolesListView from "./views/chat-roles-list.js";
+import ChatRoleUsersView from "./views/chat-role-users.js";
 // Создаем приложение
 new App();
 
@@ -22,6 +23,7 @@ router.register("/chats/details/users", ChatUsersView);
 router.register("/chats/details/roles", ChatRolesView);
 router.register("/chats/details/roles/add", ChatRolesAddView);
 router.register("/chats/details/roles/list", ChatRolesListView);
+router.register("/chats/details/roles/list/users", ChatRoleUsersView);
 
 window.app.setRouter(router);
 router.navigate("/", window.app);

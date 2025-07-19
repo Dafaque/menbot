@@ -8,8 +8,6 @@ class TextView extends View {
         this.placeholder = data.field.placeholder;
         this.onSave = data.onSave;
         this.field = data.field;
-
-        console.log("data", data);
     }
 
     renderContent() {
@@ -64,8 +62,8 @@ class TextView extends View {
         this.goBack();
     }
 
-    service = () => {
-        return true;
+    cacheable = () => {
+        return false;
     }
 }
 

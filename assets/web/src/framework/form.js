@@ -1,17 +1,18 @@
 import View from "./view.js";
 
 class Form extends View {
-    constructor(fields = []) {
+    constructor() {
         super();
-        this.fields = fields;
+        this.fields = {};
         this.currentFieldIndex = 0;
         this.values = {};
         
         // Инициализируем значения
-        this.fields.forEach(field => {
+        Object.values(this.fields).forEach(field => {
             this.values[field.name] = field.value || '';
         });
     }
+
 
     addField(name, label, type, options = {}) {
         const field = {
@@ -25,7 +26,7 @@ class Form extends View {
             ...options
         };
         
-        this.fields.push(field);
+        this.fields[field.name] = field;
         
         // Устанавливаем defaultValue сразу при добавлении поля
         if (field.defaultValue !== undefined) {
@@ -39,7 +40,7 @@ class Form extends View {
         const form = document.createElement('form');
         form.className = 'form';
         let firstEditableFieldFound = false;
-        this.fields.forEach((field, index) => {
+        Object.values(this.fields).forEach((field, index) => {
             if (!firstEditableFieldFound && !field.readonly) {
                 firstEditableFieldFound = true;
                 this.currentFieldIndex = index;
@@ -129,10 +130,9 @@ class Form extends View {
         if (currentSelected) {
             currentSelected.classList.remove('selected');
         }
-        
         // Вычисляем новый индекс
         let newIndex = this.currentFieldIndex + direction;
-        const maxIndex = this.fields.length; // включая кнопку Save
+        const maxIndex = Object.keys(this.fields).length; // включая кнопку Save
         
         if (newIndex < 0) {
             newIndex = maxIndex;
@@ -141,7 +141,7 @@ class Form extends View {
         }
         
         // Пропускаем readonly поля при навигации
-        if (newIndex < this.fields.length) {
+        if (newIndex <  maxIndex) {
             const field = this.fields[newIndex];
             if (field && field.readonly) {
                 // Пропускаем readonly поле
@@ -160,7 +160,7 @@ class Form extends View {
         this.currentFieldIndex = newIndex;
         
         // Выделяем новый элемент
-        if (newIndex === this.fields.length) {
+        if (newIndex === maxIndex) {
             // Кнопка Save
             const saveButton = document.querySelector('.save-button');
             if (saveButton) {
@@ -176,12 +176,13 @@ class Form extends View {
     }
 
     handleEnter() {
-        if (this.currentFieldIndex === this.fields.length) {
+        if (this.currentFieldIndex === Object.keys(this.fields).length) {
             // Кнопка Save
             this.save();
         } else {
             // Поле формы
-            const field = this.fields[this.currentFieldIndex];
+            
+            const field = Object.values(this.fields)[this.currentFieldIndex];
             if (field && !field.readonly) {
                 this.editField(field);
             }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"log"
 
 	api "github.com/Dafaque/mentbot/internal/api/gen"
 )
@@ -32,4 +33,40 @@ func (h *handler) GetChatRoles(ctx context.Context, request api.GetChatRolesRequ
 		})
 	}
 	return response, nil
+}
+
+// GetRoleUsers implements api.StrictServerInterface.
+func (h *handler) GetRoleUsers(ctx context.Context, request api.GetRoleUsersRequestObject) (api.GetRoleUsersResponseObject, error) {
+	users, err := h.store.ListRoleUsers(ctx, request.ChatId, request.RoleId)
+	if err != nil {
+		return nil, err
+	}
+	response := api.GetRoleUsers200JSONResponse{UserListResponseJSONResponse: []api.User{}}
+	for _, user := range users {
+		response.UserListResponseJSONResponse = append(response.UserListResponseJSONResponse, api.User{
+			Id:         int(user.ID),
+			ChatId:     int(user.ChatID),
+			TgChatId:   int(user.TgChatID),
+			TgChatName: user.TgChatName,
+			TgUserId:   int(user.TgUserID),
+			TgUserName: user.TgUserName,
+		})
+	}
+	return response, nil
+}
+
+// AssignRole implements api.StrictServerInterface.
+func (h *handler) AssignRole(ctx context.Context, request api.AssignRoleRequestObject) (api.AssignRoleResponseObject, error) {
+	for _, user := range *request.Body {
+		var err error
+		if user.Assign {
+			err = h.store.AssignRole(ctx, request.ChatId, request.RoleId, int64(user.UserId))
+		} else {
+			err = h.store.UnassignRole(ctx, request.ChatId, request.RoleId, int64(user.UserId))
+		}
+		if err != nil {
+			log.Println(err)
+		}
+	}
+	return api.AssignRole200Response{}, nil
 }

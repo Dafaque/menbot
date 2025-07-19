@@ -50,7 +50,7 @@ class Router {
             }
             
             this.currentView = new ViewClass(data);
-            if (!this.currentView.service()) {
+            if (this.currentView.cacheable()) {
                 this.views.set(path, this.currentView);
             }
             
@@ -70,6 +70,8 @@ class Router {
         
         // Сохраняем текущий путь
         this.currentPath = path;
+
+        this.currentView.appear(data);
     }
 
     getCurrentView() {

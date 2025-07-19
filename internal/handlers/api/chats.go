@@ -52,3 +52,19 @@ func (h *handler) GetChatUsers(ctx context.Context, request api.GetChatUsersRequ
 	}
 	return response, nil
 }
+
+// GetChat implements api.StrictServerInterface.
+func (h *handler) GetChat(ctx context.Context, request api.GetChatRequestObject) (api.GetChatResponseObject, error) {
+	chat, err := h.store.GetChatByID(ctx, request.ChatId)
+	if err != nil {
+		return nil, err
+	}
+
+	response := api.Chat{
+		Id:         int(chat.ID),
+		TgChatId:   int(chat.TgChatID),
+		TgChatName: chat.TgChatName,
+		Authorized: chat.Authorized,
+	}
+	return api.GetChat200JSONResponse{ChatResponseJSONResponse: api.ChatResponseJSONResponse(response)}, nil
+}

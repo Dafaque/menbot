@@ -1,4 +1,3 @@
-import Box from "../framework/box.js";
 import Table from "../framework/table.js";
 
 class Chat {
@@ -15,10 +14,10 @@ class ChatsView extends Table {
         super();
         this.setTitle("Chats");
         this.error = null;
-        this.fetchChats();
     }
 
     async fetchChats() {
+        this.data = [];
         fetch("/api/chats")
             .then(response => response.json())
             .then(this.onChatsLoaded.bind(this), this.onChatsError.bind(this))
@@ -40,6 +39,10 @@ class ChatsView extends Table {
     
     onSelected = (row) => {
         window.app.router.navigate("/chats/details", row);
+    }
+
+    appear = () => {
+        this.fetchChats();
     }
 }
 

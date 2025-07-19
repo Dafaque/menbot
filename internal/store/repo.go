@@ -21,6 +21,7 @@ type Repository interface {
 	ListChats(ctx context.Context) ([]Chat, error)
 	FindChat(ctx context.Context, tgChatID int64) (Chat, error)
 	SetChatAuthorized(ctx context.Context, chatID int64, authorized bool) error
+	GetChatByID(ctx context.Context, chatID int64) (Chat, error)
 
 	AddChatUser(ctx context.Context, chatID, tgUserID int64, tgUserName string) error
 	RemoveChatUser(ctx context.Context, recordID int64) error
@@ -34,7 +35,7 @@ type Repository interface {
 	ListAllRolesForBotCommands(ctx context.Context) (map[int64][]string, error)
 
 	AssignRole(ctx context.Context, chatID, roleID, chatUserID int64) error
-	UnassignRole(ctx context.Context, recordID int64) error
+	UnassignRole(ctx context.Context, chatID, roleID, chatUserID int64) error
 	ListRoleUsers(ctx context.Context, chatID, roleID int64) ([]RoleUser, error)
 
 	Done() error
@@ -201,6 +202,28 @@ func (r *repository) SetChatAuthorized(ctx context.Context, chatID int64, author
 		return err
 	}
 	return tx.Commit()
+}
+
+func (r *repository) GetChatByID(ctx context.Context, chatID int64) (Chat, error) {
+	sb := squirrel.Select("id", "tg_chat_id", "tg_chat_name", "authorized").From(tableChats).Where(squirrel.Eq{"id": chatID})
+	query, args, err := sb.ToSql()
+	if err != nil {
+		return Chat{}, err
+	}
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return Chat{}, err
+	}
+	defer rows.Close()
+	if !rows.Next() {
+		return Chat{}, errors.New("chat not found")
+	}
+	var chat Chat
+	err = rows.Scan(&chat.ID, &chat.TgChatID, &chat.TgChatName, &chat.Authorized)
+	if err != nil {
+		return Chat{}, err
+	}
+	return chat, nil
 }
 
 // MARK: - Chat Users
@@ -494,7 +517,7 @@ func (r *repository) ListRoleUsers(ctx context.Context, chatID, roleID int64) ([
 	).From(tableRoleUsers + " AS ru").
 		Join(tableChatUsers + " AS cu ON ru.chat_user_id = cu.id").
 		Join(tableChats + " AS c ON ru.chat_id = c.id").
-		Where(squirrel.Eq{"chat_id": chatID, "role_id": roleID})
+		Where(squirrel.Eq{"ru.chat_id": chatID, "ru.role_id": roleID})
 	query, args, err := sb.ToSql()
 	if err != nil {
 		return nil, err
@@ -524,8 +547,8 @@ func (r *repository) ListRoleUsers(ctx context.Context, chatID, roleID int64) ([
 	return roleUsers, nil
 }
 
-func (r *repository) UnassignRole(ctx context.Context, recordID int64) error {
-	sb := squirrel.Delete(tableRoleUsers).Where(squirrel.Eq{"id": recordID})
+func (r *repository) UnassignRole(ctx context.Context, chatID, roleID, chatUserID int64) error {
+	sb := squirrel.Delete(tableRoleUsers).Where(squirrel.Eq{"chat_id": chatID, "role_id": roleID, "chat_user_id": chatUserID})
 	query, args, err := sb.ToSql()
 	if err != nil {
 		return err

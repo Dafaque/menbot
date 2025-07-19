@@ -3,13 +3,10 @@ import Form from "../framework/form.js";
 class ChatRolesAddView extends Form {
     constructor(data) {
         super();
-        this.setTitle("Add Role");
-        this.data = data;
-        this.addField("name", "Name", "text");
     }
 
     onSave = (values) => {
-        fetch(`/api/chats/${this.data.id}/roles`, {
+        fetch(`/api/chats/${this.chat.id}/roles`, {
             method: "POST",
             body: JSON.stringify({
                 name: values.name,
@@ -19,6 +16,15 @@ class ChatRolesAddView extends Form {
                 this.goBack();
             }
         });
+    }
+
+    appear = (data) => {
+        if (data) {
+            this.chat = data;
+        }
+        this.setTitle(`Add Role to Chat ${this.chat.tg_chat_name}`);
+        this.addField("name", "Name", "text");
+        this.render();
     }
 }
 

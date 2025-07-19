@@ -4,14 +4,12 @@ class ChatUsersView extends Table {
     constructor(data) {
         super();
         this.setTitle("Chat Users");
-        this.table = new Table();
         this.chat = data;
-        this.users = [];
-        this.fetchUsers();
     }
 
 
     async fetchUsers() {
+        this.data = [];
         fetch(`/api/chats/${this.chat.id}/users`).then(response => {
             if (response.ok) {
                 return response.json();
@@ -23,6 +21,11 @@ class ChatUsersView extends Table {
                 this.render();
             }
         });
+    }
+
+    appear = (data) => {
+        this.chat = data;
+        this.fetchUsers();
     }
 }
 

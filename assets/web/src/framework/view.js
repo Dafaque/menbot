@@ -52,7 +52,7 @@ class View {
             const currentPath = window.app.router.getCurrentPath();
             const parentPath = this.getParentPath(currentPath);
             if (parentPath) {
-                this.app.router.navigate(parentPath, window.app);
+                this.app.router.navigate(parentPath);
             }
         }
     }
@@ -82,10 +82,13 @@ class View {
         // Переопределяется в наследниках
     }
 
-    // Сервисное вью, его не нужно кэшировать
-    service() {
-        return false;
+    // Не кэшировать вью
+    cacheable() {
+        return true;
     }
+
+    // Вью показана
+    appear(args) {}
 }
 
 export default View; 

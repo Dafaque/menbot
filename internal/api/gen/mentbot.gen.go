@@ -72,11 +72,23 @@ type User struct {
 // ChatListResponse defines model for ChatListResponse.
 type ChatListResponse = []Chat
 
+// ChatResponse defines model for ChatResponse.
+type ChatResponse = Chat
+
 // RoleListResponse defines model for RoleListResponse.
 type RoleListResponse = []Role
 
 // UserListResponse defines model for UserListResponse.
 type UserListResponse = []User
+
+// AssignUsersToRoleRequest defines model for AssignUsersToRoleRequest.
+type AssignUsersToRoleRequest = []struct {
+	// Assign Whether to assign the user to the role
+	Assign bool `json:"assign"`
+
+	// UserId The unique identifier for the user
+	UserId int `json:"user_id"`
+}
 
 // RoleRequest defines model for RoleRequest.
 type RoleRequest struct {
@@ -95,14 +107,29 @@ type CreateRoleJSONBody struct {
 	Name string `json:"name"`
 }
 
+// AssignRoleJSONBody defines parameters for AssignRole.
+type AssignRoleJSONBody = []struct {
+	// Assign Whether to assign the user to the role
+	Assign bool `json:"assign"`
+
+	// UserId The unique identifier for the user
+	UserId int `json:"user_id"`
+}
+
 // CreateRoleJSONRequestBody defines body for CreateRole for application/json ContentType.
 type CreateRoleJSONRequestBody CreateRoleJSONBody
+
+// AssignRoleJSONRequestBody defines body for AssignRole for application/json ContentType.
+type AssignRoleJSONRequestBody = AssignRoleJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Get all chats
 	// (GET /chats)
 	GetChats(w http.ResponseWriter, r *http.Request)
+	// Get a chat
+	// (GET /chats/{chat_id})
+	GetChat(w http.ResponseWriter, r *http.Request, chatId int64)
 	// Authorize/deauthorize chat
 	// (PUT /chats/{chat_id})
 	AuthorizeChat(w http.ResponseWriter, r *http.Request, chatId int64, params AuthorizeChatParams)
@@ -112,6 +139,12 @@ type ServerInterface interface {
 	// Create a role
 	// (POST /chats/{chat_id}/roles)
 	CreateRole(w http.ResponseWriter, r *http.Request, chatId int64)
+	// Get a role users
+	// (GET /chats/{chat_id}/roles/{role_id})
+	GetRoleUsers(w http.ResponseWriter, r *http.Request, chatId int64, roleId int64)
+	// Assign a role to a users
+	// (POST /chats/{chat_id}/roles/{role_id})
+	AssignRole(w http.ResponseWriter, r *http.Request, chatId int64, roleId int64)
 	// Get all users for a chat
 	// (GET /chats/{chat_id}/users)
 	GetChatUsers(w http.ResponseWriter, r *http.Request, chatId int64)
@@ -132,6 +165,32 @@ func (siw *ServerInterfaceWrapper) GetChats(w http.ResponseWriter, r *http.Reque
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetChats(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetChat operation middleware
+func (siw *ServerInterfaceWrapper) GetChat(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "chat_id" -------------
+	var chatId int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "chat_id", r.PathValue("chat_id"), &chatId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "chat_id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetChat(w, r, chatId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -228,6 +287,76 @@ func (siw *ServerInterfaceWrapper) CreateRole(w http.ResponseWriter, r *http.Req
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CreateRole(w, r, chatId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetRoleUsers operation middleware
+func (siw *ServerInterfaceWrapper) GetRoleUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "chat_id" -------------
+	var chatId int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "chat_id", r.PathValue("chat_id"), &chatId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "chat_id", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "role_id" -------------
+	var roleId int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "role_id", r.PathValue("role_id"), &roleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "role_id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRoleUsers(w, r, chatId, roleId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// AssignRole operation middleware
+func (siw *ServerInterfaceWrapper) AssignRole(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "chat_id" -------------
+	var chatId int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "chat_id", r.PathValue("chat_id"), &chatId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "chat_id", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "role_id" -------------
+	var roleId int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "role_id", r.PathValue("role_id"), &roleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "role_id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AssignRole(w, r, chatId, roleId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -378,15 +507,20 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	}
 
 	m.HandleFunc("GET "+options.BaseURL+"/chats", wrapper.GetChats)
+	m.HandleFunc("GET "+options.BaseURL+"/chats/{chat_id}", wrapper.GetChat)
 	m.HandleFunc("PUT "+options.BaseURL+"/chats/{chat_id}", wrapper.AuthorizeChat)
 	m.HandleFunc("GET "+options.BaseURL+"/chats/{chat_id}/roles", wrapper.GetChatRoles)
 	m.HandleFunc("POST "+options.BaseURL+"/chats/{chat_id}/roles", wrapper.CreateRole)
+	m.HandleFunc("GET "+options.BaseURL+"/chats/{chat_id}/roles/{role_id}", wrapper.GetRoleUsers)
+	m.HandleFunc("POST "+options.BaseURL+"/chats/{chat_id}/roles/{role_id}", wrapper.AssignRole)
 	m.HandleFunc("GET "+options.BaseURL+"/chats/{chat_id}/users", wrapper.GetChatUsers)
 
 	return m
 }
 
 type ChatListResponseJSONResponse []Chat
+
+type ChatResponseJSONResponse Chat
 
 type RoleListResponseJSONResponse []Role
 
@@ -414,6 +548,23 @@ type GetChats404Response struct {
 func (response GetChats404Response) VisitGetChatsResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
 	return nil
+}
+
+type GetChatRequestObject struct {
+	ChatId int64 `json:"chat_id"`
+}
+
+type GetChatResponseObject interface {
+	VisitGetChatResponse(w http.ResponseWriter) error
+}
+
+type GetChat200JSONResponse struct{ ChatResponseJSONResponse }
+
+func (response GetChat200JSONResponse) VisitGetChatResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type AuthorizeChatRequestObject struct {
@@ -483,6 +634,58 @@ func (response CreateRole200Response) VisitCreateRoleResponse(w http.ResponseWri
 	return nil
 }
 
+type GetRoleUsersRequestObject struct {
+	ChatId int64 `json:"chat_id"`
+	RoleId int64 `json:"role_id"`
+}
+
+type GetRoleUsersResponseObject interface {
+	VisitGetRoleUsersResponse(w http.ResponseWriter) error
+}
+
+type GetRoleUsers200JSONResponse struct{ UserListResponseJSONResponse }
+
+func (response GetRoleUsers200JSONResponse) VisitGetRoleUsersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetRoleUsers404Response struct {
+}
+
+func (response GetRoleUsers404Response) VisitGetRoleUsersResponse(w http.ResponseWriter) error {
+	w.WriteHeader(404)
+	return nil
+}
+
+type AssignRoleRequestObject struct {
+	ChatId int64 `json:"chat_id"`
+	RoleId int64 `json:"role_id"`
+	Body   *AssignRoleJSONRequestBody
+}
+
+type AssignRoleResponseObject interface {
+	VisitAssignRoleResponse(w http.ResponseWriter) error
+}
+
+type AssignRole200Response struct {
+}
+
+func (response AssignRole200Response) VisitAssignRoleResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
+type AssignRole404Response struct {
+}
+
+func (response AssignRole404Response) VisitAssignRoleResponse(w http.ResponseWriter) error {
+	w.WriteHeader(404)
+	return nil
+}
+
 type GetChatUsersRequestObject struct {
 	ChatId int64 `json:"chat_id"`
 }
@@ -513,6 +716,9 @@ type StrictServerInterface interface {
 	// Get all chats
 	// (GET /chats)
 	GetChats(ctx context.Context, request GetChatsRequestObject) (GetChatsResponseObject, error)
+	// Get a chat
+	// (GET /chats/{chat_id})
+	GetChat(ctx context.Context, request GetChatRequestObject) (GetChatResponseObject, error)
 	// Authorize/deauthorize chat
 	// (PUT /chats/{chat_id})
 	AuthorizeChat(ctx context.Context, request AuthorizeChatRequestObject) (AuthorizeChatResponseObject, error)
@@ -522,6 +728,12 @@ type StrictServerInterface interface {
 	// Create a role
 	// (POST /chats/{chat_id}/roles)
 	CreateRole(ctx context.Context, request CreateRoleRequestObject) (CreateRoleResponseObject, error)
+	// Get a role users
+	// (GET /chats/{chat_id}/roles/{role_id})
+	GetRoleUsers(ctx context.Context, request GetRoleUsersRequestObject) (GetRoleUsersResponseObject, error)
+	// Assign a role to a users
+	// (POST /chats/{chat_id}/roles/{role_id})
+	AssignRole(ctx context.Context, request AssignRoleRequestObject) (AssignRoleResponseObject, error)
 	// Get all users for a chat
 	// (GET /chats/{chat_id}/users)
 	GetChatUsers(ctx context.Context, request GetChatUsersRequestObject) (GetChatUsersResponseObject, error)
@@ -573,6 +785,32 @@ func (sh *strictHandler) GetChats(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetChatsResponseObject); ok {
 		if err := validResponse.VisitGetChatsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetChat operation middleware
+func (sh *strictHandler) GetChat(w http.ResponseWriter, r *http.Request, chatId int64) {
+	var request GetChatRequestObject
+
+	request.ChatId = chatId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetChat(ctx, request.(GetChatRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetChat")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetChatResponseObject); ok {
+		if err := validResponse.VisitGetChatResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -659,6 +897,67 @@ func (sh *strictHandler) CreateRole(w http.ResponseWriter, r *http.Request, chat
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(CreateRoleResponseObject); ok {
 		if err := validResponse.VisitCreateRoleResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetRoleUsers operation middleware
+func (sh *strictHandler) GetRoleUsers(w http.ResponseWriter, r *http.Request, chatId int64, roleId int64) {
+	var request GetRoleUsersRequestObject
+
+	request.ChatId = chatId
+	request.RoleId = roleId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetRoleUsers(ctx, request.(GetRoleUsersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetRoleUsers")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetRoleUsersResponseObject); ok {
+		if err := validResponse.VisitGetRoleUsersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AssignRole operation middleware
+func (sh *strictHandler) AssignRole(w http.ResponseWriter, r *http.Request, chatId int64, roleId int64) {
+	var request AssignRoleRequestObject
+
+	request.ChatId = chatId
+	request.RoleId = roleId
+
+	var body AssignRoleJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AssignRole(ctx, request.(AssignRoleRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AssignRole")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AssignRoleResponseObject); ok {
+		if err := validResponse.VisitAssignRoleResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

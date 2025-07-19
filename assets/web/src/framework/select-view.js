@@ -47,8 +47,8 @@ class SelectView extends View {
         }
     }
 
-    service = () => {
-        return true;
+    cacheable = () => {
+        return false;
     }
 }
 
