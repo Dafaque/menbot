@@ -20,6 +20,7 @@ type Repository interface {
 	RemoveChat(ctx context.Context, chatID int64) error
 	ListChats(ctx context.Context) ([]Chat, error)
 	FindChat(ctx context.Context, tgChatID int64) (Chat, error)
+	SetChatAuthorized(ctx context.Context, chatID int64, authorized bool) error
 
 	AddChatUser(ctx context.Context, chatID, tgUserID int64, tgUserName string) error
 	RemoveChatUser(ctx context.Context, recordID int64) error
@@ -132,7 +133,9 @@ func (r *repository) ListChats(ctx context.Context) ([]Chat, error) {
 		"id",
 		"tg_chat_id",
 		"tg_chat_name",
-	).From(tableChats)
+		"authorized",
+	).
+		From(tableChats)
 	query, args, err := sb.ToSql()
 	if err != nil {
 		return nil, err
@@ -145,7 +148,7 @@ func (r *repository) ListChats(ctx context.Context) ([]Chat, error) {
 	chats := []Chat{}
 	for rows.Next() {
 		var chat Chat
-		err = rows.Scan(&chat.ID, &chat.TgChatID, &chat.TgChatName)
+		err = rows.Scan(&chat.ID, &chat.TgChatID, &chat.TgChatName, &chat.Authorized)
 		if err != nil {
 			return nil, err
 		}
@@ -180,6 +183,24 @@ func (r *repository) FindChat(ctx context.Context, tgChatID int64) (Chat, error)
 		return Chat{}, err
 	}
 	return chat, nil
+}
+
+func (r *repository) SetChatAuthorized(ctx context.Context, chatID int64, authorized bool) error {
+	sb := squirrel.Update(tableChats).Set("authorized", authorized).Where(squirrel.Eq{"id": chatID})
+	query, args, err := sb.ToSql()
+	if err != nil {
+		return err
+	}
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	_, err = tx.Exec(query, args...)
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 // MARK: - Chat Users
@@ -301,7 +322,7 @@ func (r *repository) FindChatUser(ctx context.Context, chatID, tgUserID int64) (
 
 // MARK: - Roles
 func (r *repository) AddRole(ctx context.Context, chatID int64, roleName string) error {
-	sb := squirrel.Insert(tableRoles).Columns("chat_id", "role_name").Values(chatID, roleName)
+	sb := squirrel.Insert(tableRoles).Columns("chat_id", "name").Values(chatID, roleName)
 	query, args, err := sb.ToSql()
 	if err != nil {
 		return err

@@ -1,0 +1,217 @@
+openapi: 3.0.3
+info:
+  title: MENTBOT API
+  version: 1.0.0
+  description: API для работы с MENTBOT
+
+paths:
+  /chats:
+    get:
+      summary: Get all chats
+      operationId: getChats
+      responses:
+        200:
+          $ref: '#/components/responses/ChatListResponse'
+        404:
+          description: Чатов нет
+  /chats/{chat_id}:
+    put:
+      summary: Authorize/deauthorize chat
+      operationId: authorizeChat
+      parameters:
+        - name: chat_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+        - name: authorized
+          in: query
+          schema:
+            type: boolean
+          required: true
+      responses:
+        200:
+          description: Chat authorized/deauthorized
+        404:
+          description: Chat not found
+
+  /chats/{chat_id}/users:
+    get:
+      summary: Get all users for a chat
+      operationId: getChatUsers
+      parameters:
+        - name: chat_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+      responses:
+        200:
+          $ref: '#/components/responses/UserListResponse'
+        404:
+          description: Chat not found
+  /chats/{chat_id}/roles:
+    get:
+      summary: Get all roles for a chat
+      operationId: getChatRoles
+      parameters:
+        - name: chat_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+      responses:
+        200:
+          $ref: '#/components/responses/RoleListResponse'
+        404:
+          description: Chat not found
+    post:
+      summary: Create a role
+      operationId: createRole
+      parameters:
+        - name: chat_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+      requestBody:
+        $ref: '#/components/requestBodies/RoleRequest'
+      responses:
+        200:
+          description: Role created
+  
+components:
+  responses:
+    ChatListResponse:
+      description: A list of chats
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Chat'
+    ChatResponse:
+      description: A chat
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Chat'
+    UserListResponse:
+      description: A list of users
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+    UserResponse:
+      description: A user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    RoleListResponse:
+      description: A list of roles
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Role'
+    RoleResponse:
+      description: A role
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Role'
+  requestBodies:
+    RoleRequest:
+      description: A role
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the role
+            required:
+              - name
+
+  schemas:
+    Chat:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier for the chat
+        tg_chat_id:
+          type: integer
+          description: The Telegram chat ID
+        tg_chat_name:
+          type: string
+          description: The name of the chat
+        authorized:
+          type: boolean
+          description: Whether the chat is authorized
+      required:
+        - id
+        - tg_chat_id
+        - tg_chat_name
+        - authorized
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier for the user
+        chat_id:
+          type: integer
+          description: The unique identifier for the chat
+        tg_chat_name:
+          type: string
+          description: The name of the chat
+        tg_chat_id:
+          type: integer
+          description: The Telegram chat ID
+        tg_user_id:
+          type: integer
+          description: The Telegram user ID
+        tg_user_name:
+          type: string
+          description: The name of the user
+      required:
+        - id
+        - chat_id
+        - tg_chat_name
+        - tg_chat_id
+        - tg_user_id
+        - tg_user_name
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier for the role
+        chat_id:
+          type: integer
+          description: The unique identifier for the chat
+        tg_chat_id:
+          type: integer
+          description: The Telegram chat ID
+        tg_chat_name:
+          type: string
+          description: The name of the chat
+        name:
+          type: string
+          description: The name of the role
+      required:
+        - id
+        - chat_id
+        - tg_chat_id
+        - tg_chat_name
+        - name

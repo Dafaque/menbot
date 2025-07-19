@@ -1,10 +1,7 @@
 class View {
     constructor() {
-        this.container = document.createElement("div");
-        this.container.classList.add("view");
-        this.app = null;
         this.data = null;
-        this.path = null;
+        this.container = null;
         this.title = null; // Автоматический title
     }
 
@@ -13,69 +10,81 @@ class View {
     }
 
     render() {
-        this.container.innerHTML = "";
+        // Создаем контейнер
+        this.container = document.createElement('div');
+        this.container.className = 'view';
         
         // Устанавливаем title из data если он есть
         if (this.data?.field?.label) {
             this.title = this.data.field.label;
         }
         
-        // Автоматически добавляем title если он есть
+        // Добавляем заголовок если есть
         if (this.title) {
-            const titleElement = document.createElement("h1");
+            const titleElement = document.createElement('h1');
             titleElement.textContent = this.title;
-            titleElement.classList.add("title");
+            titleElement.classList.add('title');
             this.container.appendChild(titleElement);
         }
         
-        // Автоматически передаем app в компоненты
-        if (this.app) {
-            if (this.form && this.form.setApp) {
-                this.form.setApp(this.app);
-            }
-            if (this.menu && this.menu.setApp) {
-                this.menu.setApp(this.app);
-            }
+        // Рендерим содержимое
+        const child = this.renderContent();
+        if (child) {
+            this.container.appendChild(child);
         }
         
-        // Вызываем renderContent для наследников
-        this.renderContent();
+        // Заменяем содержимое app
+        const appElement = document.getElementById('app');
+        if (appElement) {
+            appElement.innerHTML = '';
+            appElement.appendChild(this.container);
+        }
         
         return this.container;
     }
 
     renderContent() {
         // Переопределяется в наследниках
-        // Здесь должна быть основная логика рендера
-    }
-
-    show() {
-        // Просто вызываем render - router сам заменит содержимое
-        this.render();
-    }
-
-    handleKey(key) {
-        // Автоматически хэндлим ESC во всех views
-        if (key === "Escape") {
-            this.goBack();
-        }
     }
 
     goBack() {
-        // Возвращаемся по иерархии URL
         if (this.app && this.app.router) {
-            const currentPath = this.app.router.getCurrentPath();
-            const parentPath = this.app.router.getParentPath(currentPath);
-            
-            // Переходим к родительскому пути
-            this.navigate(parentPath);
+            const currentPath = window.app.router.getCurrentPath();
+            const parentPath = this.getParentPath(currentPath);
+            if (parentPath) {
+                this.app.router.navigate(parentPath, window.app);
+            }
         }
     }
 
-    navigate(path, data = null) {
-        if (this.app) {
-            this.app.navigate(path, data);
+    getParentPath(path) {
+        const parts = path.split('/').filter(part => part);
+        if (parts.length === 0) {
+            return null;
         }
+        parts.pop();
+        if (parts.length === 0) {
+            return "/";
+        }
+        return "/" + parts.join("/");
+    }
+
+    // Методы для обработки событий (переопределяются в наследниках)
+    onKeyDown(e) {
+        // Переопределяется в наследниках
+    }
+
+    onKeyUp(e) {
+        // Переопределяется в наследниках
+    }
+
+    onSubmit(e) {
+        // Переопределяется в наследниках
+    }
+
+    // Сервисное вью, его не нужно кэшировать
+    service() {
+        return false;
     }
 }
 

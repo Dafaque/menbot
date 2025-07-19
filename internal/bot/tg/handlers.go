@@ -122,7 +122,7 @@ func (b *Bot) handleAuthorize(m *telego.Message) string {
 		b.ctx,
 		chatID.ID,
 		m.From.ID,
-		chatID.Username,
+		m.Chat.Title,
 		m.From.Username,
 	)
 	if err != nil {

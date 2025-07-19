@@ -4,42 +4,51 @@ import Menu from "./menu.js";
 class SelectView extends View {
     constructor() {
         super();
-        this.setTitle("Выбор опции");
-        this._menu = null; // Скрываем от App
+        this.menu = null;
+        this.onSave = null;
     }
 
     renderContent() {
-        const container = document.createElement("div");
-        container.classList.add("select-edit-container");
+        const container = document.createElement('div');
+        container.className = 'select-view';
         
-        // Создаем меню из опций
-        const choices = this.data?.field?.choices || [];
+        const field = this.data?.field;
         const currentValue = this.data?.currentValue;
         
-        this._menu = new Menu();
+        if (!field || !field.choices) {
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'error-message';
+            errorMessage.textContent = 'No choices available';
+            container.appendChild(errorMessage);
+            return container;
+        }
         
-        // Добавляем опции в меню
-        choices.forEach(choice => {
-            this._menu.addItem(choice.text, () => {
+        // Создаем меню из choices
+        const menuOptions = field.choices.map(choice => ({
+            label: choice.text || choice.label,
+            action: () => {
                 if (this.data?.onSave) {
                     this.data.onSave(choice.value);
                 }
                 this.goBack();
-            });
-        });
+            }
+        }));
         
-        this._menu.setApp(this.app);
+        this.menu = new Menu(menuOptions);
+        const menuElement = this.menu.render();
+        container.appendChild(menuElement);
         
-        container.appendChild(this._menu.render());
-        this.container.appendChild(container);
+        return container;
     }
 
-    handleKey(key) {
-        if (key === "Escape") {
-            this.goBack();
-        } else if (this._menu) {
-            this._menu.handleKey(key);
+    onKeyDown(e) {
+        if (this.menu) {
+            this.menu.onKeyDown(e);
         }
+    }
+
+    service = () => {
+        return true;
     }
 }
 

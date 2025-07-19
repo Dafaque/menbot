@@ -8,6 +8,7 @@ type Chat struct {
 	ID         int64  `json:"id"`
 	TgChatID   int64  `json:"tg_chat_id"`
 	TgChatName string `json:"tg_chat_name"`
+	Authorized bool   `json:"authorized"`
 }
 
 type ChatUser struct {

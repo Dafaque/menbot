@@ -1,46 +1,71 @@
 import View from "./view.js";
 
 class TextView extends View {
-    constructor() {
+    constructor(data) {
         super();
-        this.setTitle("Редактирование текста");
-        this.input = null;
-        this.caretPosition = 0;
+        this.setTitle(`Edit ${data.field.label}`);
+        this.value = data.currentValue;
+        this.placeholder = data.field.placeholder;
+        this.onSave = data.onSave;
+        this.field = data.field;
+
+        console.log("data", data);
     }
 
     renderContent() {
-        const container = document.createElement("div");
-        container.classList.add("text-edit-container");
+        const container = document.createElement('div');
+        container.className = 'text-edit-container';
         
-        // Создаем видимый input для ввода
-        this.input = document.createElement("input");
-        this.input.type = "text";
-        this.input.classList.add("text-input");
-        this.input.value = this.data?.currentValue || "";
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'text-input';
+        input.value = this.value || '';
+        input.placeholder = this.placeholder || 'Enter text...';
         
-        container.appendChild(this.input);
-        this.container.appendChild(container);
+        // Устанавливаем курсор в конец
+        input.addEventListener('focus', () => {
+            input.setSelectionRange(input.value.length, input.value.length);
+        });
         
-        // Устанавливаем фокус после добавления в DOM
+        container.appendChild(input);
+        
+        // Фокусируем поле
         setTimeout(() => {
-            this.input.focus();
+            input.focus();
         }, 100);
+        
+        return container;
+    }
+
+    onKeyDown(e) {
+        const input = document.querySelector('.text-input');
+        
+        switch (e.key) {
+            case 'Enter':
+                e.preventDefault();
+                this.save();
+                break;
+                
+            case 'Escape':
+                e.preventDefault();
+                this.goBack();
+                break;
+        }
     }
 
     save() {
-        if (this.data?.onSave) {
-            this.data.onSave(this.input.value);
+        const input = document.querySelector('.text-input');
+        const value = input.value;
+        
+        if (this.onSave) {
+            this.onSave(value);
         }
+        
         this.goBack();
     }
 
-    handleKey(key) {
-        if (key === "Enter") {
-            this.save();
-        } else if (key === "Escape") {
-            this.goBack();
-        }
-        // Не вызываем super.handleKey() чтобы избежать двойной обработки ESC
+    service = () => {
+        return true;
     }
 }
 

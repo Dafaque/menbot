@@ -8,8 +8,10 @@ import (
 	"os/signal"
 
 	"github.com/Dafaque/mentbot/assets"
+	api "github.com/Dafaque/mentbot/internal/api/gen"
 	"github.com/Dafaque/mentbot/internal/bot/tg"
 	"github.com/Dafaque/mentbot/internal/config"
+	apiHandler "github.com/Dafaque/mentbot/internal/handlers/api"
 	handler "github.com/Dafaque/mentbot/internal/handlers/tg"
 	"github.com/Dafaque/mentbot/internal/store"
 	"github.com/Dafaque/mentbot/internal/webhandler"
@@ -37,7 +39,7 @@ func main() {
 	b.Start()
 	defer b.Stop()
 
-	go webFileserver()
+	go server(db)
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
@@ -47,9 +49,11 @@ func main() {
 
 }
 
-func webFileserver() error {
+func server(db store.Repository) error {
 	fs := webhandler.New(assets.Web, "web", "index.html")
-	http.Handle("/", fs)
+	ssh := api.NewStrictHandler(apiHandler.New(db), []api.StrictMiddlewareFunc{})
+	mux := http.NewServeMux()
+	mux.Handle("/", fs)
 
-	return http.ListenAndServe(":8080", nil)
+	return http.ListenAndServe(":8080", api.HandlerFromMuxWithBaseURL(ssh, mux, "/api"))
 }
