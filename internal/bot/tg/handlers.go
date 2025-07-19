@@ -11,6 +11,9 @@ func (b *Bot) HandleUpdate(update telego.Update) {
 	if update.Message == nil {
 		return
 	}
+	if update.Message.From.IsBot {
+		return
+	}
 	if !strings.HasPrefix(update.Message.Text, "/") {
 		return
 	}
@@ -27,62 +30,24 @@ func (b *Bot) HandleUpdate(update telego.Update) {
 			command += " " + cmdAndArgs[1]
 		}
 	}
-	msgReqUserTgId := update.Message.From.ID
-
+	// msgReqUserTgId := update.Message.From.ID
+	// update.
 	cmdWithArgs := strings.Split(command, " ")
 	if len(cmdWithArgs) < 1 {
 		return
 	}
 	cmd := cmdWithArgs[0]
-	args := cmdWithArgs[1:]
 
 	var response string
 	switch cmd {
 	case CmdHelp:
-		response = b.handleHelp(msgReqUserTgId)
-	case CmdList:
-		response = cleanupOutput(b.handleListRoles())
-	case CmdAdd:
-		roleName, err := parseAddRoleArgs(args)
-		if err != nil {
-			response = err.Error()
-			break
-		}
-		response = cleanupOutput(b.handleAddRole(msgReqUserTgId, roleName))
-	case CmdRemove:
-		roleName, err := parseRemoveRoleArgs(args)
-		if err != nil {
-			response = err.Error()
-			break
-		}
-		response = cleanupOutput(b.handleRemoveRole(msgReqUserTgId, roleName))
-	case CmdListUsers:
-		response = cleanupOutput(b.handleListRoleUsers(msgReqUserTgId))
-	case CmdAddUser:
-		roleName, userTgId, err := parseRoleUserArgs(args)
-		if err != nil {
-			response = err.Error()
-			break
-		}
-		response = cleanupOutput(b.handleAddRoleUser(msgReqUserTgId, roleName, userTgId))
-	case CmdRemoveUser:
-		roleName, userTgId, err := parseRoleUserArgs(args)
-		if err != nil {
-			response = err.Error()
-			break
-		}
-		response = cleanupOutput(b.handleRemoveRoleUser(msgReqUserTgId, roleName, userTgId))
-	case CmdAddSuperuser:
-		token, err := parseAddSuperuserArgs(args)
-		if err != nil {
-			response = err.Error()
-			break
-		}
-		response = cleanupOutput(b.handleAddSuperuser(token, msgReqUserTgId))
+		response = b.handleHelp()
 	case CmdStart:
-		response = cleanupOutput(b.handleStart(update.Message.From.Username))
+		response = cleanupOutput(b.handleStart(update.Message))
+	case CmdAuthorize:
+		response = cleanupOutput(b.handleAuthorize(update.Message))
 	default:
-		response = cleanupOutput(b.handleTagRole(cmd))
+		response = cleanupOutput(b.handleTagRole(update.Message, cmd))
 	}
 
 	if len(response) == 0 {
@@ -90,63 +55,80 @@ func (b *Bot) HandleUpdate(update telego.Update) {
 		return
 	}
 
-	_, err := b.bot.SendMessage(&telego.SendMessageParams{
-		ChatID:    update.Message.Chat.ChatID(),
-		Text:      response,
-		ParseMode: parseModeMarkdown,
-		ReplyParameters: &telego.ReplyParameters{
-			MessageID: update.Message.MessageID,
-		},
-	})
+	_, err := b.bot.SendMessage(
+		b.ctx,
+		&telego.SendMessageParams{
+			ChatID:    update.Message.Chat.ChatID(),
+			Text:      response,
+			ParseMode: parseModeMarkdown,
+			ReplyParameters: &telego.ReplyParameters{
+				MessageID: update.Message.MessageID,
+			},
+		})
 	if err != nil {
 		log.Println("Failed to send message", err)
 	}
 }
 
-func (b *Bot) handleStart(userTgId string) string {
-	return b.handlers.Start(userTgId)
-}
-
-func (b *Bot) handleHelp(msgReqUserTgId int64) string {
-	msg := helpMessage
-	if b.handlers.IsUper(msgReqUserTgId) {
-		msg += msgAlreadySuperuser
+func (b *Bot) handleStart(m *telego.Message) string {
+	err := b.handlers.Register(
+		b.ctx,
+		m.Chat.ChatID().ID,
+		m.From.ID,
+		m.From.Username,
+	)
+	if err != nil {
+		return "Failed to register"
 	}
-	return msg
+	return "Registered"
 }
 
-func (b *Bot) handleListRoles() string {
-	return b.handlers.ListRoles()
+func (b *Bot) handleHelp() string {
+	return helpMessage
 }
 
-func (b *Bot) handleAddRole(reqUserTgId int64, roleName string) string {
-	defer b.updateCommands()
-	return b.handlers.AddRole(reqUserTgId, roleName)
+func (b *Bot) handleTagRole(m *telego.Message, roleName string) string {
+	users, err := b.handlers.RoleUsers(
+		b.ctx,
+		m.Chat.ChatID().ID,
+		roleName,
+	)
+	if err != nil {
+		return "Failed to get users"
+	}
+	return strings.Join(users, ",")
 }
 
-func (b *Bot) handleRemoveRole(reqUserTgId int64, roleName string) string {
-	defer b.updateCommands()
-	return b.handlers.RemoveRole(reqUserTgId, roleName)
-}
-
-func (b *Bot) handleListRoleUsers(reqUserTgId int64) string {
-	return b.handlers.ListRoleUsers(reqUserTgId)
-}
-
-func (b *Bot) handleAddRoleUser(reqUserTgId int64, roleName, userTgId string) string {
-	return b.handlers.AddRoleUser(reqUserTgId, roleName, userTgId)
-}
-
-func (b *Bot) handleRemoveRoleUser(reqUserTgId int64, roleName, userTgId string) string {
-	return b.handlers.RemoveRoleUser(reqUserTgId, roleName, userTgId)
-}
-
-func (b *Bot) handleAddSuperuser(token string, userTgId int64) string {
-	return b.handlers.AddSuperuser(token, userTgId)
-}
-
-func (b *Bot) handleTagRole(roleName string) string {
-	return b.handlers.GetUsersByRole(roleName)
+func (b *Bot) handleAuthorize(m *telego.Message) string {
+	admins, err := b.bot.GetChatAdministrators(b.ctx, &telego.GetChatAdministratorsParams{
+		ChatID: telego.ChatID{ID: m.Chat.ChatID().ID},
+	})
+	if err != nil {
+		log.Println("Failed to get chat administrators", err)
+		return "Failed to get chat"
+	}
+	reqByAdmin := false
+	for _, member := range admins {
+		if member.MemberUser().ID == m.From.ID {
+			reqByAdmin = true
+			break
+		}
+	}
+	if !reqByAdmin {
+		return "Only admins can authorize chats"
+	}
+	chatID := m.Chat.ChatID()
+	err = b.handlers.NewChat(
+		b.ctx,
+		chatID.ID,
+		m.From.ID,
+		chatID.Username,
+		m.From.Username,
+	)
+	if err != nil {
+		return "Failed to authorize chat"
+	}
+	return "Authorized"
 }
 
 func cleanupOutput(in string) string {

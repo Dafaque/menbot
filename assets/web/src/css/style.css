@@ -1,0 +1,548 @@
+/* Terminal-style CSS with dark theme */
+
+/* Global font */
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Courier Prime', 'Courier New', 'Monaco', 'Menlo', monospace;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background-color: #000000;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.3;
+    cursor: none; /* Скрываем курсор на всей странице */
+}
+
+/* Скрываем курсор на всех элементах */
+* {
+    cursor: none !important;
+}
+
+/* Terminal container */
+.terminal-container {
+  background-color: #000000;
+  border: 2px solid #00ff00;
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Main app container */
+#app {
+  width: 70%;
+  margin: 0 auto;
+  min-width: 600px;
+}
+
+/* Fieldset - terminal box */
+fieldset {
+  background-color: #1a1a1a;
+  border: 1px solid #00ff00;
+  border-radius: 3px;
+  padding: 15px;
+  margin: 10px 0;
+  color: #00ff00;
+}
+
+fieldset legend {
+  color: #00ff00;
+  font-weight: bold;
+  padding: 0 10px;
+  background-color: #1a1a1a;
+}
+
+/* Lists and list items */
+ul, ol {
+  list-style: none;
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+li {
+  padding: 3px 8px;
+  margin: 1px 0;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Regular list item */
+li {
+  color: #00ff00;
+  background-color: transparent;
+}
+
+/* Selected list item (with cursor) */
+li.selected {
+  background-color: #00ff00;
+  color: #000000;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+}
+
+/* Hover effect for list items */
+li:hover:not(.selected) {
+  background-color: #1a1a1a;
+  color: #00ff00;
+}
+
+/* Bullet points for lists */
+li::before {
+  content: "• ";
+  color: #00ff00;
+  font-weight: bold;
+}
+
+/* Numbered lists */
+ol li::before {
+  content: counter(list-counter) ". ";
+  counter-increment: list-counter;
+}
+
+ol {
+  counter-reset: list-counter;
+}
+
+/* Paragraphs */
+p {
+  color: #00ff00;
+  margin: 10px 0;
+  line-height: 1.6;
+}
+
+/* Native HTML buttons - компактные для клавиатуры */
+button {
+  display: inline-block;
+  padding: 4px 8px;
+  margin: 2px;
+  background-color: transparent;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  border-radius: 2px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+button::before {
+  content: "<";
+  color: #00ff00;
+}
+
+button::after {
+  content: ">";
+  color: #00ff00;
+}
+
+/* Selected button */
+button.selected {
+  background-color: #00ff00;
+  color: #000000;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+}
+
+/* Hover effect for buttons */
+button:hover:not(.selected) {
+  background-color: #1a1a1a;
+  box-shadow: 0 0 3px rgba(0, 255, 0, 0.3);
+}
+
+/* Progress bar in Docker style */
+.progress-container {
+  width: 100%;
+  background-color: #1a1a1a;
+  border: 1px solid #00ff00;
+  border-radius: 3px;
+  padding: 2px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 20px;
+  background-color: #00ff00;
+  color: #000000;
+  text-align: center;
+  line-height: 20px;
+  font-weight: bold;
+  font-size: 12px;
+  transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Progress bar with hash pattern */
+.progress-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.1) 2px,
+    rgba(0, 0, 0, 0.1) 4px
+  );
+}
+
+/* Cursor blink animation */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor {
+  animation: blink 1s infinite;
+}
+
+/* Hide cursor completely */
+* {
+  cursor: none !important;
+}
+
+/* Terminal checkboxes */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #00ff00;
+  background-color: transparent;
+  color: #00ff00;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 14px;
+  text-align: center;
+  cursor: none;
+  position: relative;
+  margin-right: 8px;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #00ff00;
+  color: #000000;
+}
+
+input[type="checkbox"]:checked::before {
+  content: "x";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+input[type="checkbox"]:not(:checked)::before {
+  content: " ";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Labels */
+label {
+  color: #00ff00;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00ff00;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00cc00;
+}
+
+/* View container */
+.view {
+  padding: 20px;
+  background-color: #000000;
+}
+
+/* Title styling */
+.title {
+  color: #00ff00;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+  border-bottom: 2px solid #00ff00;
+  padding-bottom: 10px;
+}
+
+/* Menu styling */
+.menu {
+  margin: 20px 0;
+}
+
+.menu-item {
+  padding: 6px 12px;
+  margin: 2px 0;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  color: #00ff00;
+  background-color: transparent;
+}
+
+.menu-item:hover,
+.menu-item.selected {
+  background-color: #00ff00;
+  color: #000000;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+}
+
+/* Form styling */
+.form {
+  margin: 20px 0;
+}
+
+.form-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    margin: 2px 0;
+    border: 1px solid #00ff00;
+    background-color: #000000;
+    transition: all 0.2s ease;
+}
+
+.form-group.selected {
+    background-color: #00ff00;
+    color: #000000;
+}
+
+.form-group.selected label {
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+.form-group label {
+    font-weight: bold;
+    min-width: 120px;
+    color: #00ff00;
+}
+
+.form-group select,
+.form-group input {
+  background-color: #1a1a1a;
+  border: 1px solid #00ff00;
+  color: #00ff00;
+  padding: 4px 8px;
+  border-radius: 2px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.form-group select:focus,
+.form-group input:focus,
+.form-group input.focused,
+.form-group select.focused {
+  outline: none;
+  box-shadow: 0 0 3px rgba(0, 255, 0, 0.5);
+  border-color: #00ff00;
+  background-color: #2a2a2a;
+}
+
+/* Стили для фокуса на группе полей */
+.form-group.focused {
+  border: 2px solid #00ff00;
+  border-radius: 3px;
+  padding: 4px;
+  background-color: #1a1a1a;
+}
+
+.form-group.focused label {
+  color: #00ff00;
+  font-weight: bold;
+}
+
+/* Стили для режима редактирования */
+.form-group.editing {
+  border: 2px solid #ffff00;
+  background-color: #2a2a2a;
+}
+
+.form-group.editing input,
+.form-group.editing select {
+  background-color: #000000;
+  color: #ffff00;
+  border-color: #ffff00;
+}
+
+/* Стили для отображения значений полей */
+.field-value {
+    flex: 1;
+    text-align: right;
+    padding-left: 15px;
+    color: #00ff00;
+}
+
+.form-group.selected .field-value {
+  color: #000000;
+  font-weight: bold;
+}
+
+/* Button styling - компактные для клавиатуры */
+.btn {
+    padding: 6px 12px;
+    margin: 5px 0;
+    background-color: #000000;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    cursor: none;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    transition: all 0.2s;
+    border-radius: 2px;
+}
+
+.btn:hover,
+.btn.selected {
+    background-color: #00ff00;
+    color: #000000;
+    font-weight: bold;
+}
+
+.btn-primary {
+  background-color: #00ff00;
+  color: #000000;
+  font-weight: bold;
+}
+
+.btn-primary:hover {
+  background-color: #00cc00;
+  box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: #00ff00;
+}
+
+/* Content styling */
+.content {
+    background-color: #000000;
+    border: 1px solid #00ff00;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.content h2 {
+    color: #00ff00;
+    margin-top: 0;
+}
+
+.content h3 {
+    color: #00ff00;
+}
+
+.content ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.content li {
+    margin: 3px 0;
+}
+
+/* Buttons container */
+.buttons {
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Focus styles for accessibility */
+*:focus {
+  outline: 2px solid #00ff00;
+  outline-offset: 2px;
+}
+
+.result-container {
+    margin: 15px 0;
+    border: 1px solid #00ff00;
+    background-color: #000000;
+    padding: 10px;
+}
+
+.result-container h3 {
+    color: #00ff00;
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.result-container pre {
+    background-color: #000000;
+    border: 1px solid #00ff00;
+    padding: 8px;
+    margin: 8px 0;
+    overflow: auto;
+    max-height: 250px;
+    color: #00ff00;
+    font-family: monospace;
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+/* Framework компоненты */
+.field-label {
+    color: #00ff00;
+    margin-bottom: 15px;
+}
+
+.value-display {
+    background-color: #000000;
+    border: 1px solid #00ff00;
+    padding: 8px;
+    margin: 8px 0;
+    font-family: monospace;
+    font-size: 14px;
+    color: #00ff00;
+    min-height: 25px;
+}
+
+.hidden-input {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+}

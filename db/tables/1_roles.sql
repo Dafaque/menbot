@@ -1,5 +1,8 @@
 CREATE TABLE IF NOT EXISTS roles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name VARCHAR(64) NOT NULL
+    chat_id INT NOT NULL,
+    name VARCHAR(64) NOT NULL,
+    FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX IF NOT EXISTS idx_roles_name ON roles (name);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_roles_name ON roles (chat_id, name);

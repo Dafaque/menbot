@@ -4,13 +4,36 @@ const (
 	sqliteDbName = "store.db"
 )
 
+type Chat struct {
+	ID         int64  `json:"id"`
+	TgChatID   int64  `json:"tg_chat_id"`
+	TgChatName string `json:"tg_chat_name"`
+}
+
+type ChatUser struct {
+	ID         int64  `json:"id"`
+	ChatID     int64  `json:"chat_id"`
+	TgChatName string `json:"tg_chat_name"`
+	TgChatID   int64  `json:"tg_chat_id"`
+	TgUserID   int64  `json:"tg_user_id"`
+	TgUserName string `json:"tg_user_name"`
+}
+
 type Role struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	ID         int64  `json:"id"`
+	ChatID     int64  `json:"chat_id"`
+	TgChatID   int64  `json:"tg_chat_id"`
+	TgChatName string `json:"tg_chat_name"`
+	Name       string `json:"name"`
 }
 
 type RoleUser struct {
-	Id       int    `json:"id"`
-	RoleId   int    `json:"role_id"`
-	UserTgId string `json:"user_tg_id"`
+	ID         int64  `json:"id"`
+	RoleID     int64  `json:"role_id"`
+	RoleName   string `json:"role_name"`
+	ChatID     int64  `json:"chat_id"`
+	TgUserID   int64  `json:"tg_user_id"`
+	TgUserName string `json:"tg_user_name"`
+	TgChatName string `json:"tg_chat_name"`
+	TgChatID   int64  `json:"tg_chat_id"`
 }

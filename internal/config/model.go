@@ -10,13 +10,11 @@ import (
 type Config struct {
 	BotToken string
 	DBPath   string
-	SuToken  string
 }
 
 var (
 	flagBotToken = flag.String("bot", "", "Bot token")
 	flagDBPath   = flag.String("db", "storage", "DB path")
-	flagSuToken  = flag.String("su", "", "Superuser token")
 )
 
 func NewConfig() (*Config, error) {
@@ -30,13 +28,9 @@ func NewConfig() (*Config, error) {
 			return nil, err
 		}
 	}
-	if *flagSuToken == "" {
-		return nil, errors.New("superuser token is required")
-	}
 	cfg := &Config{
 		BotToken: *flagBotToken,
 		DBPath:   *flagDBPath,
-		SuToken:  *flagSuToken,
 	}
 	return cfg, nil
 }

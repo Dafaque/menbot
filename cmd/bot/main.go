@@ -3,13 +3,16 @@ package main
 import (
 	"flag"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 
+	"github.com/Dafaque/mentbot/assets"
 	"github.com/Dafaque/mentbot/internal/bot/tg"
 	"github.com/Dafaque/mentbot/internal/config"
-	"github.com/Dafaque/mentbot/internal/handlers/handler"
+	handler "github.com/Dafaque/mentbot/internal/handlers/tg"
 	"github.com/Dafaque/mentbot/internal/store"
+	"github.com/Dafaque/mentbot/internal/webhandler"
 )
 
 func main() {
@@ -33,7 +36,20 @@ func main() {
 
 	b.Start()
 	defer b.Stop()
+
+	go webFileserver()
+
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
 	<-ch
+	b.Stop()
+	log.Println("close db error:", db.Done())
+
+}
+
+func webFileserver() error {
+	fs := webhandler.New(assets.Web, "web", "index.html")
+	http.Handle("/", fs)
+
+	return http.ListenAndServe(":8080", nil)
 }
