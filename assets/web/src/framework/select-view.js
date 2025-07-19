@@ -4,46 +4,42 @@ import Menu from "./menu.js";
 class SelectView extends View {
     constructor() {
         super();
-        this.menu = new Menu();
-        
-        // Переопределяем menu.handleKey чтобы перехватывать ESC
-        const originalHandleKey = this.menu.handleKey.bind(this.menu);
-        this.menu.handleKey = (key) => {
-            if (key === "Escape") {
-                this.navigate(this.data.returnPath);
-            } else {
-                originalHandleKey(key);
-            }
-        };
+        this.setTitle("Выбор опции");
+        this._menu = null; // Скрываем от App
     }
 
     renderContent() {
-        // Очищаем и создаем меню заново
-        this.menu = new Menu();
+        const container = document.createElement("div");
+        container.classList.add("select-edit-container");
         
-        // Снова переопределяем handleKey для нового меню
-        const originalHandleKey = this.menu.handleKey.bind(this.menu);
-        this.menu.handleKey = (key) => {
-            if (key === "Escape") {
-                this.navigate(this.data.returnPath);
-            } else {
-                originalHandleKey(key);
-            }
-        };
+        // Создаем меню из опций
+        const choices = this.data?.field?.choices || [];
+        const currentValue = this.data?.currentValue;
         
-        if (this.data?.field?.choices) {
-            this.data.field.choices.forEach(choice => {
-                this.menu.addItem(choice.text, () => {
-                    if (this.data.onSave) {
-                        this.data.onSave(choice.value);
-                    }
-                    this.navigate(this.data.returnPath);
-                });
+        this._menu = new Menu();
+        
+        // Добавляем опции в меню
+        choices.forEach(choice => {
+            this._menu.addItem(choice.text, () => {
+                if (this.data?.onSave) {
+                    this.data.onSave(choice.value);
+                }
+                this.goBack();
             });
-        }
+        });
         
-        const menuContainer = this.menu.render();
-        this.container.appendChild(menuContainer);
+        this._menu.setApp(this.app);
+        
+        container.appendChild(this._menu.render());
+        this.container.appendChild(container);
+    }
+
+    handleKey(key) {
+        if (key === "Escape") {
+            this.goBack();
+        } else if (this._menu) {
+            this._menu.handleKey(key);
+        }
     }
 }
 

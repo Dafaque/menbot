@@ -10,9 +10,9 @@ const app = new App();
 // Регистрируем маршруты
 app.registerRoute("/", MenuView);
 app.registerRoute("/menu", MenuView);
-app.registerRoute("/settings", SettingsView);
-app.registerRoute("/info", InfoView);
-app.registerRoute("/api", ApiView);
+app.registerRoute("/menu/settings", SettingsView);
+app.registerRoute("/menu/info", InfoView);
+app.registerRoute("/menu/api", ApiView);
 
 // Запускаем приложение
 app.start("/");

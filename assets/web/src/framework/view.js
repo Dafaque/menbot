@@ -62,18 +62,13 @@ class View {
     }
 
     goBack() {
-        // Возвращаемся по иерархии, а не по истории
+        // Возвращаемся по иерархии URL
         if (this.app && this.app.router) {
             const currentPath = this.app.router.getCurrentPath();
+            const parentPath = this.app.router.getParentPath(currentPath);
             
-            // Если есть returnPath в data, используем его
-            if (this.data?.returnPath) {
-                this.navigate(this.data.returnPath);
-                return;
-            }
-            
-            // Иначе возвращаемся в главное меню
-            this.navigate("/");
+            // Переходим к родительскому пути
+            this.navigate(parentPath);
         }
     }
 

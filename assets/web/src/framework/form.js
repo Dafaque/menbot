@@ -16,13 +16,20 @@ class Form {
     }
 
     addField(name, label, type, options = {}) {
-        this.fields.push({
+        const field = {
             name,
             label,
             type,
             placeholder: options.placeholder,
             ...options
-        });
+        };
+        
+        this.fields.push(field);
+        
+        // Устанавливаем defaultValue сразу при добавлении поля
+        if (field.defaultValue !== undefined) {
+            this.values[field.name] = field.defaultValue;
+        }
     }
 
     getValue(name) {
@@ -70,20 +77,24 @@ class Form {
     editField(field) {
         if (field.type === "select") {
             // Переходим к выбору опции
-            this.app.navigate("/select", {
+            const currentPath = this.app.router.getCurrentPath();
+            const selectPath = this.app.router.getChildPath(currentPath, "select-edit");
+            
+            this.app.navigate(selectPath, {
                 field: field,
                 currentValue: this.values[field.name],
-                returnPath: this.app.router.getCurrentPath(),
                 onSave: (value) => {
                     this.values[field.name] = value;
                 }
             });
         } else if (field.type === "text") {
             // Переходим к вводу текста
-            this.app.navigate("/text", {
+            const currentPath = this.app.router.getCurrentPath();
+            const textPath = this.app.router.getChildPath(currentPath, "text-edit");
+            
+            this.app.navigate(textPath, {
                 field: field,
                 currentValue: this.values[field.name],
-                returnPath: this.app.router.getCurrentPath(),
                 onSave: (value) => {
                     this.values[field.name] = value;
                 }
@@ -123,7 +134,7 @@ class Form {
             } else if (field.type === "text") {
                 value.textContent = this.values[field.name] || (field.placeholder || "Enter...");
             } else if (field.type === "checkbox") {
-                value.textContent = this.values[field.name] ? "✓" : "✗";
+                value.textContent = this.values[field.name] ? "[X]" : "[ ]";
             }
             
             group.appendChild(label);

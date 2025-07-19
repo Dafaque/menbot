@@ -13,7 +13,7 @@ class SettingsView extends View {
                 { value: "light", text: "Светлая" },
                 { value: "auto", text: "Авто" }
             ],
-            defaultValue: "dark",
+            defaultValue: "",
             placeholder: "Выберите тему..."
         });
         
@@ -42,7 +42,7 @@ class SettingsView extends View {
         
         this.form.onSubmit = (values) => {
             console.log("Settings saved:", values);
-            this.navigate("/menu");
+            this.goBack();
         };
     }
 

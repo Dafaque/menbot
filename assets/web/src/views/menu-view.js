@@ -8,15 +8,15 @@ class MenuView extends View {
         this.menu = new Menu();
         
         this.menu.addItem("Настройки", () => {
-            this.navigate("/settings", { returnPath: "/menu" });
+            this.navigate("/menu/settings", { returnPath: "/menu" });
         });
         
         this.menu.addItem("Информация", () => {
-            this.navigate("/info", { returnPath: "/menu" });
+            this.navigate("/menu/info", { returnPath: "/menu" });
         });
         
         this.menu.addItem("API Тестер", () => {
-            this.navigate("/api", { returnPath: "/menu" });
+            this.navigate("/menu/api", { returnPath: "/menu" });
         });
     }
 

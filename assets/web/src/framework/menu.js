@@ -4,6 +4,11 @@ class Menu {
         this.selectedIndex = 0;
         this.container = document.createElement("div");
         this.container.classList.add("menu");
+        this.app = null;
+    }
+
+    setApp(app) {
+        this.app = app;
     }
 
     addItem(text, action) {

@@ -9,6 +9,43 @@ class Router {
 
     register(path, ViewClass) {
         this.routes.set(path, ViewClass);
+        
+        // Автоматически регистрируем маршруты для редактирования
+        this.registerEditRoutes(path, ViewClass);
+    }
+
+    // Автоматически регистрируем маршруты для редактирования
+    registerEditRoutes(path, ViewClass) {
+        // Импортируем view'ы для редактирования
+        import("./text-view.js").then(module => {
+            const TextView = module.default;
+            const textPath = this.getChildPath(path, "text-edit");
+            this.routes.set(textPath, TextView);
+        });
+        
+        import("./select-view.js").then(module => {
+            const SelectView = module.default;
+            const selectPath = this.getChildPath(path, "select-edit");
+            this.routes.set(selectPath, SelectView);
+        });
+    }
+
+    // Получить родительский путь
+    getParentPath(path) {
+        const parts = path.split('/').filter(part => part);
+        if (parts.length <= 1) {
+            return "/"; // Корневой путь
+        }
+        parts.pop(); // Убираем последний сегмент
+        return "/" + parts.join("/");
+    }
+
+    // Получить дочерний путь
+    getChildPath(parentPath, childSegment) {
+        if (parentPath === "/") {
+            return "/" + childSegment;
+        }
+        return parentPath + "/" + childSegment;
     }
 
     navigate(path, app, data = null) {

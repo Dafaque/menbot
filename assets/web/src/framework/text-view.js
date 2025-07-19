@@ -3,60 +3,44 @@ import View from "./view.js";
 class TextView extends View {
     constructor() {
         super();
+        this.setTitle("Редактирование текста");
         this.input = null;
+        this.caretPosition = 0;
     }
 
     renderContent() {
-        // Показываем текущее значение
-        const valueDisplay = document.createElement("div");
-        valueDisplay.classList.add("value-display");
-        valueDisplay.textContent = this.data?.currentValue || "";
+        const container = document.createElement("div");
+        container.classList.add("text-edit-container");
         
-        // Создаем input для ввода (скрытый)
+        // Создаем видимый input для ввода
         this.input = document.createElement("input");
         this.input.type = "text";
-        this.input.classList.add("hidden-input");
+        this.input.classList.add("text-input");
         this.input.value = this.data?.currentValue || "";
         
-        // Обработчики для input
-        this.input.addEventListener("input", (e) => {
-            valueDisplay.textContent = e.target.value || "";
-        });
+        container.appendChild(this.input);
+        this.container.appendChild(container);
         
-        this.input.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                e.stopPropagation();
-                if (this.data?.onSave) {
-                    this.data.onSave(this.input.value);
-                }
-                this.navigate(this.data.returnPath);
-            } else if (e.key === "Escape") {
-                e.preventDefault();
-                e.stopPropagation();
-                this.navigate(this.data.returnPath);
-            }
-        });
-        
-        this.container.appendChild(valueDisplay);
-        this.container.appendChild(this.input);
-        
-        // Фокусируемся на input
+        // Устанавливаем фокус после добавления в DOM
         setTimeout(() => {
             this.input.focus();
         }, 100);
     }
 
+    save() {
+        if (this.data?.onSave) {
+            this.data.onSave(this.input.value);
+        }
+        this.goBack();
+    }
+
     handleKey(key) {
-        // Если input в фокусе, не обрабатываем клавиши
-        if (this.input && this.input === document.activeElement) {
-            return;
+        if (key === "Enter") {
+            this.save();
+        } else if (key === "Escape") {
+            this.goBack();
         }
-        
-        // Если input не в фокусе, фокусируемся на нем
-        if (this.input) {
-            this.input.focus();
-        }
+        // Не вызываем super.handleKey() чтобы избежать двойной обработки ESC
     }
 }
 
