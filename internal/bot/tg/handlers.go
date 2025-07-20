@@ -46,6 +46,10 @@ func (b *Bot) HandleUpdate(update telego.Update) {
 		response = cleanupOutput(b.handleStart(update.Message))
 	case CmdAuthorize:
 		response = cleanupOutput(b.handleAuthorize(update.Message))
+	case CmdSubscribe:
+		response = cleanupOutput(b.handleSubscribe(update.Message, cmdWithArgs[1:]))
+	case CmdUnsubscribe:
+		response = cleanupOutput(b.handleUnsubscribe(update.Message, cmdWithArgs[1:]))
 	default:
 		response = cleanupOutput(b.handleTagRole(update.Message, cmd))
 	}
@@ -96,7 +100,14 @@ func (b *Bot) handleTagRole(m *telego.Message, roleName string) string {
 	if err != nil {
 		return "Failed to get users"
 	}
-	return strings.Join(users, ",")
+	str := strings.Builder{}
+	for _, user := range users {
+		str.WriteString("@")
+		str.WriteString(user)
+		str.WriteString(", ")
+	}
+	result, _ := strings.CutSuffix(str.String(), ", ")
+	return result
 }
 
 func (b *Bot) handleAuthorize(m *telego.Message) string {
@@ -131,6 +142,42 @@ func (b *Bot) handleAuthorize(m *telego.Message) string {
 	return "Authorized"
 }
 
+func (b *Bot) handleSubscribe(m *telego.Message, args []string) string {
+	if len(args) == 0 {
+		return "Usage: /subscribe <roleName>"
+	}
+	roleName := args[0]
+	err := b.handlers.Subscribe(
+		b.ctx,
+		m.Chat.ChatID().ID,
+		m.From.ID,
+		roleName,
+	)
+	if err != nil {
+		return "Failed to subscribe"
+	}
+	return "Subscribed"
+}
+
+func (b *Bot) handleUnsubscribe(m *telego.Message, args []string) string {
+	if len(args) == 0 {
+		return "Usage: /unsubscribe <roleName>"
+	}
+	roleName := args[0]
+	err := b.handlers.Unsubscribe(
+		b.ctx,
+		m.Chat.ChatID().ID,
+		m.From.ID,
+		roleName,
+	)
+	if err != nil {
+		return "Failed to unsubscribe"
+	}
+	return "Unsubscribed"
+}
 func cleanupOutput(in string) string {
-	return strings.ReplaceAll(in, "_", "\\_")
+	clean := strings.ReplaceAll(in, "_", "\\_")
+	clean = strings.ReplaceAll(clean, ">", "\\>")
+	clean = strings.ReplaceAll(clean, "<", "\\<")
+	return clean
 }

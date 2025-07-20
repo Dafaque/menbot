@@ -419,14 +419,14 @@ func (r *repository) ListRoles(ctx context.Context, chatID int64) ([]Role, error
 
 func (r *repository) FindRole(ctx context.Context, chatID int64, roleName string) (Role, error) {
 	sb := squirrel.Select(
-		"id",
-		"chat_id",
-		"name",
+		"r.id",
+		"r.chat_id",
+		"r.name",
 		"c.tg_chat_id",
 		"c.tg_chat_name",
 	).From(tableRoles + " AS r").
 		Join(tableChats + " AS c ON r.chat_id = c.id").
-		Where(squirrel.Eq{"chat_id": chatID, "name": roleName}).
+		Where(squirrel.Eq{"r.chat_id": chatID, "r.name": roleName}).
 		Limit(1)
 	query, args, err := sb.ToSql()
 	if err != nil {

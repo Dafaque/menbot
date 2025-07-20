@@ -65,6 +65,9 @@ func (b *Bot) updateCommands() {
 		commands := []telego.BotCommand{
 			{Command: CmdHelp, Description: "Show help"},
 			{Command: CmdStart, Description: "Start bot"},
+			{Command: CmdAuthorize, Description: "Authorize chat"},
+			{Command: CmdSubscribe, Description: "Subscribe to role"},
+			{Command: CmdUnsubscribe, Description: "Unsubscribe from role"},
 		}
 		for _, role := range roles {
 			commands = append(commands, telego.BotCommand{
