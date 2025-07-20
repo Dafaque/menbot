@@ -11,6 +11,7 @@ type Handler interface {
 	NewChat(ctx context.Context, tgChatID, tgUserID int64, tgChatName, tgUserName string) error
 	Register(ctx context.Context, tgChatID, tgUserID int64, tgUserName string) error
 	RoleUsers(ctx context.Context, tgChatID int64, roleName string) ([]string, error)
+	AllUsers(ctx context.Context, tgChatID int64) ([]string, error)
 	Subscribe(ctx context.Context, tgChatID, tgUserID int64, roleName string) error
 	Unsubscribe(ctx context.Context, tgChatID, tgUserID int64, roleName string) error
 	RolesForBotCommands(ctx context.Context) (map[int64][]string, error)
@@ -66,6 +67,22 @@ func (h *handler) RoleUsers(ctx context.Context, tgChatID int64, roleName string
 		users[i] = roleUser.TgUserName
 	}
 	return users, nil
+}
+
+func (h *handler) AllUsers(ctx context.Context, tgChatID int64) ([]string, error) {
+	chat, err := h.repo.FindChat(ctx, tgChatID)
+	if err != nil {
+		return nil, err
+	}
+	users, err := h.repo.ListChatUsers(ctx, chat.ID)
+	if err != nil {
+		return nil, err
+	}
+	usernames := make([]string, len(users))
+	for i, user := range users {
+		usernames[i] = user.TgUserName
+	}
+	return usernames, nil
 }
 
 func (h *handler) Subscribe(ctx context.Context, tgChatID, tgUserID int64, roleName string) error {

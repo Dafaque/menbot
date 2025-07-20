@@ -8,6 +8,8 @@ const (
 
 	CmdSubscribe   = "subscribe"
 	CmdUnsubscribe = "unsubscribe"
+
+	RoleAll = "all"
 )
 
 const (

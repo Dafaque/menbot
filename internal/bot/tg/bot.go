@@ -68,6 +68,7 @@ func (b *Bot) UpdateCommands() {
 			{Command: CmdAuthorize, Description: "Authorize chat"},
 			{Command: CmdSubscribe, Description: "Subscribe to role"},
 			{Command: CmdUnsubscribe, Description: "Unsubscribe from role"},
+			{Command: RoleAll, Description: "Tag all users"},
 		}
 		for _, role := range roles {
 			commands = append(commands, telego.BotCommand{

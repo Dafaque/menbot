@@ -92,11 +92,20 @@ func (b *Bot) handleHelp() string {
 }
 
 func (b *Bot) handleTagRole(m *telego.Message, roleName string) string {
-	users, err := b.handlers.RoleUsers(
-		b.ctx,
-		m.Chat.ChatID().ID,
-		roleName,
-	)
+	var users []string
+	var err error
+	if roleName == RoleAll {
+		users, err = b.handlers.AllUsers(
+			b.ctx,
+			m.Chat.ChatID().ID,
+		)
+	} else {
+		users, err = b.handlers.RoleUsers(
+			b.ctx,
+			m.Chat.ChatID().ID,
+			roleName,
+		)
+	}
 	if err != nil {
 		return "Failed to get users"
 	}
