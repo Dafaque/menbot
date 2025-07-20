@@ -5,10 +5,15 @@ import (
 	"github.com/Dafaque/mentbot/internal/store"
 )
 
-type handler struct {
-	store store.Repository
+type commandsUpdater interface {
+	UpdateCommands()
 }
 
-func New(store store.Repository) api.StrictServerInterface {
-	return &handler{store: store}
+type handler struct {
+	store           store.Repository
+	commandsUpdater commandsUpdater
+}
+
+func New(store store.Repository, commandsUpdater commandsUpdater) api.StrictServerInterface {
+	return &handler{store: store, commandsUpdater: commandsUpdater}
 }

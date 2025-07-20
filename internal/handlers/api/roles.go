@@ -13,7 +13,18 @@ func (h *handler) CreateRole(ctx context.Context, request api.CreateRoleRequestO
 	if err != nil {
 		return nil, err
 	}
+	go h.commandsUpdater.UpdateCommands()
 	return api.CreateRole200Response{}, nil
+}
+
+// RemoveRole implements api.StrictServerInterface.
+func (h *handler) RemoveRole(ctx context.Context, request api.RemoveRoleRequestObject) (api.RemoveRoleResponseObject, error) {
+	err := h.store.RemoveRole(ctx, request.RoleId)
+	if err != nil {
+		return nil, err
+	}
+	go h.commandsUpdater.UpdateCommands()
+	return api.RemoveRole200Response{}, nil
 }
 
 // GetChatRoles implements api.StrictServerInterface.

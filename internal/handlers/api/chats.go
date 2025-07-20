@@ -77,12 +77,3 @@ func (h *handler) DeleteChatUser(ctx context.Context, request api.DeleteChatUser
 	}
 	return api.DeleteChatUser200Response{}, nil
 }
-
-// RemoveRole implements api.StrictServerInterface.
-func (h *handler) RemoveRole(ctx context.Context, request api.RemoveRoleRequestObject) (api.RemoveRoleResponseObject, error) {
-	err := h.store.RemoveRole(ctx, request.RoleId)
-	if err != nil {
-		return nil, err
-	}
-	return api.RemoveRole200Response{}, nil
-}

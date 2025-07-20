@@ -39,7 +39,7 @@ func main() {
 	b.Start()
 	defer b.Stop()
 
-	go server(db)
+	go server(db, b)
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
@@ -49,9 +49,9 @@ func main() {
 
 }
 
-func server(db store.Repository) error {
+func server(db store.Repository, b *tg.Bot) error {
 	fs := webhandler.New(assets.Web, "web", "index.html")
-	ssh := api.NewStrictHandler(apiHandler.New(db), []api.StrictMiddlewareFunc{})
+	ssh := api.NewStrictHandler(apiHandler.New(db, b), []api.StrictMiddlewareFunc{})
 	mux := http.NewServeMux()
 	mux.Handle("/", fs)
 

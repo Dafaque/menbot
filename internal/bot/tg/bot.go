@@ -26,7 +26,7 @@ func NewBot(token string, handler tg.Handler) *Bot {
 	}
 	b := &Bot{bot: bot, handlers: handler}
 	b.ctx, b.cancel = context.WithCancel(context.Background())
-	b.updateCommands()
+	b.UpdateCommands()
 	return b
 }
 
@@ -55,7 +55,7 @@ func (b *Bot) Stop() {
 	b.cancel()
 }
 
-func (b *Bot) updateCommands() {
+func (b *Bot) UpdateCommands() {
 
 	roles, err := b.handlers.RolesForBotCommands(b.ctx)
 	if err != nil {
