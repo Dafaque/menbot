@@ -139,6 +139,9 @@ type ServerInterface interface {
 	// Create a role
 	// (POST /chats/{chat_id}/roles)
 	CreateRole(w http.ResponseWriter, r *http.Request, chatId int64)
+	// Remove a role
+	// (DELETE /chats/{chat_id}/roles/{role_id})
+	RemoveRole(w http.ResponseWriter, r *http.Request, chatId int64, roleId int64)
 	// Get a role users
 	// (GET /chats/{chat_id}/roles/{role_id})
 	GetRoleUsers(w http.ResponseWriter, r *http.Request, chatId int64, roleId int64)
@@ -148,6 +151,9 @@ type ServerInterface interface {
 	// Get all users for a chat
 	// (GET /chats/{chat_id}/users)
 	GetChatUsers(w http.ResponseWriter, r *http.Request, chatId int64)
+	// Delete a user for a chat
+	// (DELETE /chats/{chat_id}/users/{user_id})
+	DeleteChatUser(w http.ResponseWriter, r *http.Request, chatId int64, userId int64)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -296,6 +302,41 @@ func (siw *ServerInterfaceWrapper) CreateRole(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
+// RemoveRole operation middleware
+func (siw *ServerInterfaceWrapper) RemoveRole(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "chat_id" -------------
+	var chatId int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "chat_id", r.PathValue("chat_id"), &chatId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "chat_id", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "role_id" -------------
+	var roleId int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "role_id", r.PathValue("role_id"), &roleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "role_id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RemoveRole(w, r, chatId, roleId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
 // GetRoleUsers operation middleware
 func (siw *ServerInterfaceWrapper) GetRoleUsers(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -383,6 +424,41 @@ func (siw *ServerInterfaceWrapper) GetChatUsers(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetChatUsers(w, r, chatId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteChatUser operation middleware
+func (siw *ServerInterfaceWrapper) DeleteChatUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "chat_id" -------------
+	var chatId int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "chat_id", r.PathValue("chat_id"), &chatId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "chat_id", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "user_id" -------------
+	var userId int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", r.PathValue("user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user_id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteChatUser(w, r, chatId, userId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -511,9 +587,11 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("PUT "+options.BaseURL+"/chats/{chat_id}", wrapper.AuthorizeChat)
 	m.HandleFunc("GET "+options.BaseURL+"/chats/{chat_id}/roles", wrapper.GetChatRoles)
 	m.HandleFunc("POST "+options.BaseURL+"/chats/{chat_id}/roles", wrapper.CreateRole)
+	m.HandleFunc("DELETE "+options.BaseURL+"/chats/{chat_id}/roles/{role_id}", wrapper.RemoveRole)
 	m.HandleFunc("GET "+options.BaseURL+"/chats/{chat_id}/roles/{role_id}", wrapper.GetRoleUsers)
 	m.HandleFunc("POST "+options.BaseURL+"/chats/{chat_id}/roles/{role_id}", wrapper.AssignRole)
 	m.HandleFunc("GET "+options.BaseURL+"/chats/{chat_id}/users", wrapper.GetChatUsers)
+	m.HandleFunc("DELETE "+options.BaseURL+"/chats/{chat_id}/users/{user_id}", wrapper.DeleteChatUser)
 
 	return m
 }
@@ -634,6 +712,23 @@ func (response CreateRole200Response) VisitCreateRoleResponse(w http.ResponseWri
 	return nil
 }
 
+type RemoveRoleRequestObject struct {
+	ChatId int64 `json:"chat_id"`
+	RoleId int64 `json:"role_id"`
+}
+
+type RemoveRoleResponseObject interface {
+	VisitRemoveRoleResponse(w http.ResponseWriter) error
+}
+
+type RemoveRole200Response struct {
+}
+
+func (response RemoveRole200Response) VisitRemoveRoleResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
 type GetRoleUsersRequestObject struct {
 	ChatId int64 `json:"chat_id"`
 	RoleId int64 `json:"role_id"`
@@ -711,6 +806,23 @@ func (response GetChatUsers404Response) VisitGetChatUsersResponse(w http.Respons
 	return nil
 }
 
+type DeleteChatUserRequestObject struct {
+	ChatId int64 `json:"chat_id"`
+	UserId int64 `json:"user_id"`
+}
+
+type DeleteChatUserResponseObject interface {
+	VisitDeleteChatUserResponse(w http.ResponseWriter) error
+}
+
+type DeleteChatUser200Response struct {
+}
+
+func (response DeleteChatUser200Response) VisitDeleteChatUserResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Get all chats
@@ -728,6 +840,9 @@ type StrictServerInterface interface {
 	// Create a role
 	// (POST /chats/{chat_id}/roles)
 	CreateRole(ctx context.Context, request CreateRoleRequestObject) (CreateRoleResponseObject, error)
+	// Remove a role
+	// (DELETE /chats/{chat_id}/roles/{role_id})
+	RemoveRole(ctx context.Context, request RemoveRoleRequestObject) (RemoveRoleResponseObject, error)
 	// Get a role users
 	// (GET /chats/{chat_id}/roles/{role_id})
 	GetRoleUsers(ctx context.Context, request GetRoleUsersRequestObject) (GetRoleUsersResponseObject, error)
@@ -737,6 +852,9 @@ type StrictServerInterface interface {
 	// Get all users for a chat
 	// (GET /chats/{chat_id}/users)
 	GetChatUsers(ctx context.Context, request GetChatUsersRequestObject) (GetChatUsersResponseObject, error)
+	// Delete a user for a chat
+	// (DELETE /chats/{chat_id}/users/{user_id})
+	DeleteChatUser(ctx context.Context, request DeleteChatUserRequestObject) (DeleteChatUserResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -904,6 +1022,33 @@ func (sh *strictHandler) CreateRole(w http.ResponseWriter, r *http.Request, chat
 	}
 }
 
+// RemoveRole operation middleware
+func (sh *strictHandler) RemoveRole(w http.ResponseWriter, r *http.Request, chatId int64, roleId int64) {
+	var request RemoveRoleRequestObject
+
+	request.ChatId = chatId
+	request.RoleId = roleId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RemoveRole(ctx, request.(RemoveRoleRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RemoveRole")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RemoveRoleResponseObject); ok {
+		if err := validResponse.VisitRemoveRoleResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // GetRoleUsers operation middleware
 func (sh *strictHandler) GetRoleUsers(w http.ResponseWriter, r *http.Request, chatId int64, roleId int64) {
 	var request GetRoleUsersRequestObject
@@ -984,6 +1129,33 @@ func (sh *strictHandler) GetChatUsers(w http.ResponseWriter, r *http.Request, ch
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetChatUsersResponseObject); ok {
 		if err := validResponse.VisitGetChatUsersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteChatUser operation middleware
+func (sh *strictHandler) DeleteChatUser(w http.ResponseWriter, r *http.Request, chatId int64, userId int64) {
+	var request DeleteChatUserRequestObject
+
+	request.ChatId = chatId
+	request.UserId = userId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteChatUser(ctx, request.(DeleteChatUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteChatUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteChatUserResponseObject); ok {
+		if err := validResponse.VisitDeleteChatUserResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

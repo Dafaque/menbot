@@ -65,6 +65,26 @@ paths:
           $ref: '#/components/responses/UserListResponse'
         404:
           description: Chat not found
+  /chats/{chat_id}/users/{user_id}:
+    delete:
+      summary: Delete a user for a chat
+      operationId: deleteChatUser
+      parameters:
+        - name: chat_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+        - name: user_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+      responses:
+        200:
+          description: User deleted
   /chats/{chat_id}/roles:
     get:
       summary: Get all roles for a chat
@@ -141,6 +161,25 @@ paths:
           description: Role assigned
         404:
           description: Chat or role not found
+    delete:
+      summary: Remove a role
+      operationId: removeRole
+      parameters:
+        - name: chat_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+        - name: role_id
+          in: path
+          schema:
+            type: integer
+            format: int64
+          required: true
+      responses:
+        200:
+          description: Role removed
 components:
   responses:
     ChatListResponse:

@@ -22,7 +22,7 @@ class ChatRolesListView extends Table {
     }
 
     onSelected = (row) => {
-        window.app.router.navigate("/chats/details/roles/list/users", row);
+        window.app.router.navigate("/chats/details/roles/list/options", row);
     }
 
     appear = (data) => {

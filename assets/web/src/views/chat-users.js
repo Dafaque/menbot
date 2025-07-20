@@ -23,8 +23,14 @@ class ChatUsersView extends Table {
         });
     }
 
+    onSelected = (row) => {
+        window.app.router.navigate("/chats/details/users/remove", row);
+    }
+
     appear = (data) => {
-        this.chat = data;
+        if (data) {
+            this.chat = data;
+        }
         this.fetchUsers();
     }
 }

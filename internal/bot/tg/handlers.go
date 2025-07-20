@@ -102,6 +102,9 @@ func (b *Bot) handleTagRole(m *telego.Message, roleName string) string {
 	}
 	str := strings.Builder{}
 	for _, user := range users {
+		if user == m.From.Username {
+			continue
+		}
 		str.WriteString("@")
 		str.WriteString(user)
 		str.WriteString(", ")

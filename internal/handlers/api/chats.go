@@ -68,3 +68,21 @@ func (h *handler) GetChat(ctx context.Context, request api.GetChatRequestObject)
 	}
 	return api.GetChat200JSONResponse{ChatResponseJSONResponse: api.ChatResponseJSONResponse(response)}, nil
 }
+
+// DeleteChatUser implements api.StrictServerInterface.
+func (h *handler) DeleteChatUser(ctx context.Context, request api.DeleteChatUserRequestObject) (api.DeleteChatUserResponseObject, error) {
+	err := h.store.RemoveChatUser(ctx, request.UserId)
+	if err != nil {
+		return nil, err
+	}
+	return api.DeleteChatUser200Response{}, nil
+}
+
+// RemoveRole implements api.StrictServerInterface.
+func (h *handler) RemoveRole(ctx context.Context, request api.RemoveRoleRequestObject) (api.RemoveRoleResponseObject, error) {
+	err := h.store.RemoveRole(ctx, request.RoleId)
+	if err != nil {
+		return nil, err
+	}
+	return api.RemoveRole200Response{}, nil
+}
