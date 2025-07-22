@@ -1,4 +1,4 @@
-import Table from "../framework/table.js";
+import { Table } from "kibodo";
 
 class ChatRolesListView extends Table {
     constructor(data) {

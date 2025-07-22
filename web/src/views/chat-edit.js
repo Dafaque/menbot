@@ -1,4 +1,4 @@
-import Form from "../framework/form.js";
+import { Form } from "kibodo";
 
 class EditChatView extends Form {
     constructor(chat) {

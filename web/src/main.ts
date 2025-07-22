@@ -1,17 +1,16 @@
-import App from "./framework/app.js";
-import Router from "./framework/router.js";
-import IndexView from "./views/index.js";
-import ChatsView from "./views/chats.js";
-import EditChatView from "./views/chat-edit.js";
-import ChatDetailsView from "./views/chat-details.js";
-import ChatUsersView from "./views/chat-users.js";
-import ChatRolesView from "./views/chat-roles.js";
-import ChatRolesAddView from "./views/chat-roles-add.js";
-import ChatRolesListView from "./views/chat-roles-list.js";
-import ChatRoleUsersView from "./views/chat-role-users.js";
-import ChatUsersRemoveView from "./views/chat-users-remove.js";
-import ChatRoleRemoveView from "./views/chat-role-remove.js";
-import ChatRoleOptionsView from "./views/chat-role-options.js";
+import { App, Router } from "kibodo";
+import IndexView from "./views/index";
+import ChatsView from "./views/chats";
+import EditChatView from "./views/chat-edit";
+import ChatDetailsView from "./views/chat-details";
+import ChatUsersView from "./views/chat-users";
+import ChatRolesView from "./views/chat-roles";
+import ChatRolesAddView from "./views/chat-roles-add";
+import ChatRolesListView from "./views/chat-roles-list";
+import ChatRoleUsersView from "./views/chat-role-users";
+import ChatUsersRemoveView from "./views/chat-users-remove";
+import ChatRoleRemoveView from "./views/chat-role-remove";
+import ChatRoleOptionsView from "./views/chat-role-options";
 // Создаем приложение
 new App();
 

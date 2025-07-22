@@ -1,4 +1,5 @@
-import Menu from "../framework/menu.js";
+import { Menu } from "kibodo";
+
 class ChatRoleRemoveView extends Menu {
     constructor(data) {
         super();

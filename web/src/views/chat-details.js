@@ -1,4 +1,4 @@
-import Menu from "../framework/menu.js";
+import { Menu } from "kibodo";
 
 class ChatDetailsView extends Menu {
     constructor(data) {

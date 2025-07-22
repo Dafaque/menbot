@@ -1,13 +1,4 @@
-import Table from "../framework/table.js";
-
-class Chat {
-    constructor(data) {
-        this.id = data.id;
-        this.tg_chat_id = data.tg_chat_id;
-        this.tg_chat_name = data.tg_chat_name;
-        this.authorized = data.authorized;
-    }
-}
+import { Table } from "kibodo";
 
 class ChatsView extends Table {
     constructor() {
