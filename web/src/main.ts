@@ -11,6 +11,8 @@ import ChatRoleUsersView from "./views/chat-role-users";
 import ChatUsersRemoveView from "./views/chat-users-remove";
 import ChatRoleRemoveView from "./views/chat-role-remove";
 import ChatRoleOptionsView from "./views/chat-role-options";
+import "kibodo/themes/default.css";
+
 // Создаем приложение
 new App();
 
