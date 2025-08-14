@@ -1,8 +1,8 @@
 package config
 
 import (
-	"errors"
 	"flag"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -19,8 +19,8 @@ var (
 
 func NewConfig() (*Config, error) {
 	flag.Parse()
-	if *flagBotToken == "" {
-		return nil, errors.New("bot token is required")
+	if len(*flagBotToken) == 0 {
+		log.Println("Skip starting bot because token is empty")
 	}
 	if _, err := os.Stat(*flagDBPath); err != nil {
 		err = os.MkdirAll(filepath.Dir(*flagDBPath), 0755)

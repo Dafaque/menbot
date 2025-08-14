@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+      "module": "ESNext",
+      "target": "ESNext",
+      "lib": ["esnext", "dom"],
+      "baseUrl": "./web",
+      "paths": {
+        "src": ["src/*"],
+      },
+      "moduleResolution": "bundler"
+    }
+  }

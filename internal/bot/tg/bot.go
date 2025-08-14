@@ -12,25 +12,33 @@ import (
 )
 
 type Bot struct {
-	bot      *telego.Bot
-	handlers tg.Handler
-	ctx      context.Context
-	cancel   context.CancelFunc
+	bot     *telego.Bot
+	handler tg.Handler
+	ctx     context.Context
+	cancel  context.CancelFunc
 }
 
 func NewBot(token string, handler tg.Handler) *Bot {
+	if len(token) == 0 {
+		log.Println("Skip starting bot because token is empty")
+		return nil
+	}
 	bot, err := telego.NewBot(token)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	b := &Bot{bot: bot, handlers: handler}
+	b := &Bot{bot: bot, handler: handler}
 	b.ctx, b.cancel = context.WithCancel(context.Background())
 	b.UpdateCommands()
 	return b
 }
 
 func (b *Bot) Start() error {
+	if b == nil {
+		log.Println("Skip starting bot because bot is nil")
+		return nil
+	}
 	updates, err := b.bot.UpdatesViaLongPolling(
 		b.ctx,
 		&telego.GetUpdatesParams{
@@ -52,12 +60,20 @@ func (b *Bot) Start() error {
 }
 
 func (b *Bot) Stop() {
+	if b == nil {
+		log.Println("Skip stopping bot because bot is nil")
+		return
+	}
 	b.cancel()
 }
 
 func (b *Bot) UpdateCommands() {
+	if b == nil || b.handler == nil {
+		log.Println("Skip updating commands because bot or handler is nil")
+		return
+	}
 
-	roles, err := b.handlers.RolesForBotCommands(b.ctx)
+	roles, err := b.handler.RolesForBotCommands(b.ctx)
 	if err != nil {
 		log.Println("Failed to get roles for bot commands", err)
 	}
