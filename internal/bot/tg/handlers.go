@@ -75,7 +75,7 @@ func (b *Bot) HandleUpdate(update telego.Update) {
 }
 
 func (b *Bot) handleStart(m *telego.Message) string {
-	err := b.handlers.Register(
+	err := b.handler.Register(
 		b.ctx,
 		m.Chat.ChatID().ID,
 		m.From.ID,
@@ -95,12 +95,12 @@ func (b *Bot) handleTagRole(m *telego.Message, roleName string) string {
 	var users []string
 	var err error
 	if roleName == RoleAll {
-		users, err = b.handlers.AllUsers(
+		users, err = b.handler.AllUsers(
 			b.ctx,
 			m.Chat.ChatID().ID,
 		)
 	} else {
-		users, err = b.handlers.RoleUsers(
+		users, err = b.handler.RoleUsers(
 			b.ctx,
 			m.Chat.ChatID().ID,
 			roleName,
@@ -141,7 +141,7 @@ func (b *Bot) handleAuthorize(m *telego.Message) string {
 		return "Only admins can authorize chats"
 	}
 	chatID := m.Chat.ChatID()
-	err = b.handlers.NewChat(
+	err = b.handler.NewChat(
 		b.ctx,
 		chatID.ID,
 		m.From.ID,
@@ -159,7 +159,7 @@ func (b *Bot) handleSubscribe(m *telego.Message, args []string) string {
 		return "Usage: /subscribe <roleName>"
 	}
 	roleName := args[0]
-	err := b.handlers.Subscribe(
+	err := b.handler.Subscribe(
 		b.ctx,
 		m.Chat.ChatID().ID,
 		m.From.ID,
@@ -176,7 +176,7 @@ func (b *Bot) handleUnsubscribe(m *telego.Message, args []string) string {
 		return "Usage: /unsubscribe <roleName>"
 	}
 	roleName := args[0]
-	err := b.handlers.Unsubscribe(
+	err := b.handler.Unsubscribe(
 		b.ctx,
 		m.Chat.ChatID().ID,
 		m.From.ID,

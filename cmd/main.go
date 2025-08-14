@@ -30,11 +30,7 @@ func main() {
 	}
 
 	h := handler.New(db, cfg)
-
 	b := tg.NewBot(cfg.BotToken, h)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	b.Start()
 	defer b.Stop()
@@ -44,7 +40,6 @@ func main() {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
 	<-ch
-	b.Stop()
 	log.Println("close db error:", db.Done())
 
 }
@@ -55,5 +50,6 @@ func server(db store.Repository, b *tg.Bot) error {
 	mux := http.NewServeMux()
 	mux.Handle("/", fs)
 
+	log.Println("start server", "http://localhost:8080")
 	return http.ListenAndServe(":8080", api.HandlerFromMuxWithBaseURL(ssh, mux, "/api"))
 }
